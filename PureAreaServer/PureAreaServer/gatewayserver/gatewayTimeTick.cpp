@@ -20,6 +20,7 @@ void GatewayTimeTick::run()
             snprintf(fileName,sizeof(fileName),"log/gateway-%02u.log",GatewayServer::getInstance().getServerID());
             Flyer::changeLogger(fileName,s_time.sec());
         }
+        msleep(atol(Flyer::globalConfMap["timeticksleep"].c_str()));
     }
 }
 

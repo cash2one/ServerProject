@@ -105,6 +105,7 @@ bool Server::listenPort()
 
 int Server::accept(std::map<int,int> &socketMap)
 {
+    //阻塞形
     int ret = epoll_wait(m_epfd,&m_epollEventVec[0],m_socketPortMap.size(),atol(Flyer::globalConfMap["acceptwaittime"].c_str()));
     for(int cnt = 0;cnt < ret;++cnt)
     {

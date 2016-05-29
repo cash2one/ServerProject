@@ -24,6 +24,7 @@ void LoginTimeTick::run()
         {
             TaskManager::getInstance().sendHeartMsg();
         }
+        msleep(atol(Flyer::globalConfMap["timeticksleep"].c_str()));
     }
 }
 

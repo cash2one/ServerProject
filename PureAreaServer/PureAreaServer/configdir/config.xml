@@ -18,7 +18,7 @@
         <!--mysql连接最大使用时间单位为秒-->
         <maxmysqlusetime>1800</maxmysqlusetime>
         <!--accpet等待毫秒数-->
-        <acceptwaittime>10</acceptwaittime>
+        <acceptwaittime>-1</acceptwaittime>
         <!--增加epoll的大小-->
         <addepollsize>10</addepollsize>
         <!--主线程处理任务数量-->
@@ -33,5 +33,7 @@
         <exceltbx>configdir/excelTbx/</exceltbx>
          <!--心跳包间隔-->
         <hearttime>100</hearttime>
+        <!--时间tick睡眠时间(毫秒)-->
+        <timeticksleep>1000</timeticksleep>
     </global>
 </Flyer>
