@@ -12,7 +12,6 @@ class ClientHandle : public MessageHandle
         virtual bool init();
     public:
         static bool ackVerifyServer(boost::shared_ptr<Client> client,const boost::shared_ptr<ProtoMsgData::AckVerifyServer> message);
-        static bool reqHeartBeat(boost::shared_ptr<Client> client,const boost::shared_ptr<ProtoMsgData::ReqHeartBeat> message);
 };
 
 #endif

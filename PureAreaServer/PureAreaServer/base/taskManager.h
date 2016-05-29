@@ -23,7 +23,6 @@ class TaskManager : public Singleton<TaskManager>
             return m_taskMap.size();
         }
         void eraseTask(const unsigned long taskID);
-        void randSendMsg(const unsigned long cnt);
         void randCloseFd(const unsigned long cnt);
         void randOpDB(const unsigned long cnt);
         bool sendServerMsg(const unsigned int serverID,const google::protobuf::Message &message);

@@ -33,7 +33,8 @@ src = thread.cpp\
 	  verifyThread.cpp\
 	  clientManager.cpp\
 	  excelManager.cpp\
-	  clientHandle.cpp
+	  clientHandle.cpp\
+	  connectHandle.cpp
 		
 
 object = $(patsubst %.cpp,%.o,$(src))

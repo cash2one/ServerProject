@@ -15,8 +15,6 @@ class SuperClientHandle : public MessageHandle
     
         static bool ackServerInfo(SuperClient &superClient,const boost::shared_ptr<ProtoMsgData::AckNotifyMe> message);
 
-        static bool reqHeartBeat(SuperClient &superClient,const boost::shared_ptr<ProtoMsgData::ReqHeartBeat> message);
-
 };
 
 #endif

@@ -137,6 +137,8 @@ class Base
     public:
         virtual void doSameThing()
         {
+            boost::shared_ptr<Base> now(this);
+            std::cout << "fuck now :" << endl;
         }
         virtual ~Base()
         {
@@ -150,6 +152,7 @@ class Father : public Base
         virtual void doSameThing()
         {
             std::cout << "fuck you !" << endl;
+            Base::doSameThing();
         }
 };
 
@@ -164,6 +167,9 @@ int main()
 {
 
 #if 0
+    boost::shared_ptr<Father> father (new Father());
+    father->doSameThing();
+    std::cout << "test end" << endl;
     Base *base = new Base();
     del(base);
     std::cout << "now here del" << endl;
