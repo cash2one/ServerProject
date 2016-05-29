@@ -17,7 +17,6 @@ bool ClientHandle::init()
         Client::s_clientMsgDispatcher.messageReg<ProtoMsgData::msg>(callBack);\
     }
     MESSAGE_INIT(AckVerifyServer,ackVerifyServer);
-    MESSAGE_INIT(ReqHeartBeat,reqHeartBeat);
 #undef MESSAGE_INIT
     return true;
 }
@@ -28,11 +27,3 @@ bool ClientHandle::ackVerifyServer(boost::shared_ptr<Client> client,const boost:
     client->setStatus(status);
     return true;
 }
-
-bool ClientHandle::reqHeartBeat(boost::shared_ptr<Client> client,const boost::shared_ptr<ProtoMsgData::ReqHeartBeat> message)
-{
-    ProtoMsgData::AckHeartBeat ackMsg;
-    client->sendMsg(ackMsg);
-    return true;
-}
-

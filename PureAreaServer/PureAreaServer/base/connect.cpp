@@ -6,6 +6,7 @@
 #include "system.pb.h"
 
 unsigned long Connect::s_tempid = 0;
+ConnectMessageDispatcher Connect::s_connectMsgDispatcher("链接消息处理器");
 Connect::Connect(const int socket) : m_socket(socket),m_id(++s_tempid),m_status(Task_Status_Close),m_lifeTime(),m_serverID(0),m_serverType(ProtoMsgData::ST_Client),m_heartTime()
 {
 }
@@ -62,24 +63,17 @@ bool Connect::accpetMsg()
             {
                 continue;
             }
-            MsgRet flg = this->dispatcher(message);
+            MsgRet flg = s_connectMsgDispatcher.dispatch(this,message); 
+            if(flg == MR_No_Register)
+            {
+                flg = this->dispatcher(message);
+            }
             Debug(Flyer::logger,"接受且处理消息(" << m_id << "," << message->GetTypeName() << "," << flg << ")");
         }
         ret = true;
     }while(false);
 
     return ret;
-}
-
-void Connect::sendMsg()
-{
-#if 0
-    ProtoMsgData::ReqTest test;
-    std::string ret;
-    encodeMessage(&test,ret);
-    send(m_socket,ret.c_str(),ret.size(),0);
-    Debug(Flyer::logger,"发送消息(" << m_id << "," << test.GetTypeName() << ")");
-#endif
 }
 
 void Connect::closeFd()

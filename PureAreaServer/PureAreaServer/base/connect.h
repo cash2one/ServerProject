@@ -16,6 +16,8 @@ enum TaskStatus
     Task_Status_Recycle = 3, //回收
 };
 
+class Connect;
+typedef MessageDispatcher<Connect*> ConnectMessageDispatcher;
 class Connect : private DisCopy
 {
     protected:
@@ -65,7 +67,6 @@ class Connect : private DisCopy
         }
         void addEpoll(const int epfd,const unsigned long event); 
         void delEpoll(const int epfd,const unsigned long events);
-        void sendMsg();
         bool accpetMsg();
         void closeFd();
         void doAcceptMessage();
@@ -80,6 +81,8 @@ class Connect : private DisCopy
         bool isHeartElapse();
         void resetHeartTime();
         bool sendHeartMsg();
+    public:
+        static ConnectMessageDispatcher s_connectMsgDispatcher;
 };
 
 #endif

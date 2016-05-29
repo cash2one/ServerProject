@@ -17,7 +17,6 @@ bool SuperClientHandle::init()
 }
     MESSAGE_INIT(AckUpdateServerInfo,ackUpdateServerInfo);
     MESSAGE_INIT(AckNotifyMe,ackServerInfo);
-    MESSAGE_INIT(ReqHeartBeat,reqHeartBeat);
 #undef MESSAGE_INIT
     return true;
 }
@@ -56,10 +55,3 @@ bool SuperClientHandle::ackServerInfo(SuperClient &superClient,const boost::shar
     return true;
 }
 
-bool SuperClientHandle::reqHeartBeat(SuperClient &superClient,const boost::shared_ptr<ProtoMsgData::ReqHeartBeat> message)
-{
-    ProtoMsgData::AckHeartBeat ackMsg;
-    superClient.sendMsg(ackMsg);
-    return true;
-}
- 
