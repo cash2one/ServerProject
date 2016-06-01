@@ -10,6 +10,7 @@
 #include "loginTimeTick.h"
 #include "mysqlPool.h"
 #include "excelBase.h"
+#include "redisMemManager.h"
 
 LoginServer::LoginServer() :Server("登陆服务器",ProtoMsgData::ST_Login)
 {
@@ -25,6 +26,10 @@ bool LoginServer::init()
     do
     {
         if(!Server::init())
+        {
+            break;
+        }
+        if(!loadAccount())
         {
             break;
         }
@@ -136,6 +141,49 @@ void LoginServer::endServerThread()
 void LoginServer::startServerThread()
 {
     LoginTimeTick::getInstance().start();
+}
+
+bool LoginServer::loadAccount()
+{
+    bool ret = false;
+    do
+    {
+        boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
+        if(!handle)
+        {
+            Error(Flyer::logger,"111");
+            break;
+        }
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
+        if(!redisMem)
+        {
+            Error(Flyer::logger,"222");
+            break;
+        }
+        std::vector<std::map<std::string,Flyer::FlyerValue> > ipVec;
+        char temp[100] = {0};
+        snprintf(temp,sizeof(temp),"select phone,passwd from t_register");
+        if(!handle->select(temp,strlen(temp),ipVec))
+        {
+            Error(Flyer::logger,"333");
+            break;
+        }
+        for(auto iter = ipVec.begin();iter != ipVec.end();++iter)
+        {
+            std::map<std::string,Flyer::FlyerValue> &tempMap = *iter;
+            std::string phone = tempMap["phone"];
+            std::string passwd = tempMap["passwd"];
+            if(!redisMem->setString("register",phone.c_str(),passwd.c_str()))
+            {
+                Error(Flyer::logger,"[注册表] 写入redis失败(" << phone.c_str() << "," << passwd.c_str() << ")");
+                continue;
+            }
+            std::string getPasswd = redisMem->getString("register",phone.c_str());
+            Debug(Flyer::logger,"[注册表] 读取redis(" << phone.c_str() << "," << getPasswd.c_str() << ")");
+        }
+        ret = true;
+    }while(false);
+    return ret;
 }
 
 int main()

@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS t_serverinfo
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 #flyer   201605-05-08 登录服务器数据表
-DROP TABLE IF EXISTS t_logininfo;
 CREATE TABLE IF NOT EXISTS t_logininfo
 (
     `id` BIGINT(20) UNSIGNED NOT NULL,
@@ -21,5 +20,14 @@ CREATE TABLE IF NOT EXISTS t_logininfo
     PRIMARY KEY(id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-
+#flyer   201605-05-29 注册表
+DROP TABLE IF EXISTS `t_register`;
+CREATE TABLE IF NOT EXISTS t_register
+(
+    `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `phone` varchar(20) NOT NULL,
+    `passwd` varchar(20) NOT NULL,
+    `regtime` timestamp not null default current_timestamp,  
+    PRIMARY KEY(id)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

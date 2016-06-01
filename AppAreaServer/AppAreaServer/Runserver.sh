@@ -8,7 +8,7 @@ TABLE="t_serverinfo"
 
 COMMAND="select NAME from ${TABLE}"
 declare count=`mysql -h${HOST} -u${USER} -p${PASSWD} -D ${DATABASE} -e "${COMMAND}" --skip-column-name`
-cond=$(ps -u $(basename $HOME) | grep -c server)
+cond=$(ps -u $(basename $HOME) | grep -c Server)
 ulimit -c unlimited
 
 start()
@@ -27,8 +27,8 @@ start()
     mkdir log
 
     #启动redis
-    #echo "redis-server ~/redis.conf"
-    #/data/redis/redis-server ~/redis.conf
+    echo "redis-server configdir/redis.conf"
+    redis-server configdir/redis.conf
 
     #启动login
     for list in $count
@@ -92,6 +92,13 @@ start()
 
 stop()
 {
+
+    #暂停登录服务器
+    sleep 1
+	echo "stop ./loginserver/LoginServer"
+	pkill LoginServer 
+
+
     #暂停网关服务器
     sleep 1
 	echo "stop ./gatewayserver/GatewayServer"

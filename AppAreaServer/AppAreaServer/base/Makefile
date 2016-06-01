@@ -6,7 +6,7 @@ LINK          = g++
 AR            = ar
 
 CFLAGS         := -std=c++11 $(FLYER_COMPILE_OPT) $(PIC_FLAG) -Wall -D_GNU_SOURCE -D_REENTRANT
-LDFLAG         := $(FLYER_COMPILE_OPT) -Wall -L/usr/local/lib/ -llog4cxx -L/usr/local/libxml2/lib/ -lxml2 -L../protocpp -lproto -L/usr/local/protobuf/lib/ -lprotobuf -L/usr/local/mysql/lib/mysql/ -lmysqlclient
+LDFLAG         := $(FLYER_COMPILE_OPT) -Wall -L/usr/local/lib/ -llog4cxx -L/usr/local/libxml2/lib/ -lxml2 -L../protocpp -lproto -L/usr/local/protobuf/lib/ -lprotobuf -L/usr/local/mysql/lib/mysql/ -lmysqlclient -L/usr/local/lib/ -lhiredis
 ####### Files
 src = thread.cpp\
 	  taskManager.cpp\
@@ -33,7 +33,9 @@ src = thread.cpp\
 	  verifyThread.cpp\
 	  clientManager.cpp\
 	  excelManager.cpp\
-	  clientHandle.cpp
+	  clientHandle.cpp\
+	  redisMem.cpp\
+	  redisMemManager.cpp
 		
 
 object = $(patsubst %.cpp,%.o,$(src))

@@ -251,4 +251,20 @@ namespace Flyer
         m_val = std::to_string((long double)arg);
         return *this;
     }
+
+    Flyer::FlyerValue& FlyerValue::operator= (const long long arg)
+    {
+        clear();
+        m_dataType.m_llong = arg;
+        m_val = std::to_string((long long)arg);
+        return *this;
+    }
+
+    Flyer::FlyerValue& FlyerValue::operator= (const unsigned long long uarg)
+    {
+        clear();
+        m_dataType.m_ullong = uarg;
+        m_val = std::to_string((unsigned long long)(uarg));
+        return *this;
+    }
 }

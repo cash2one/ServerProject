@@ -11,6 +11,7 @@ class LoginServer : public Server,public Singleton<LoginServer>
         LoginServer();
         ~LoginServer();
         bool loadExcelConf();
+        bool loadAccount();
     public:
         bool init();
         virtual bool acceptConnect(const int socket);

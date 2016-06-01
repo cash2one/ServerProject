@@ -19,6 +19,8 @@ namespace Flyer
                 long m_long;
                 unsigned m_ulong;
                 float m_float;
+                long long m_llong;
+                unsigned long long m_ullong;
             }DataType;
             DataType m_dataType;
             std::string m_val;
@@ -62,6 +64,8 @@ namespace Flyer
             Flyer::FlyerValue& operator= (const unsigned int uarg);
             Flyer::FlyerValue& operator= (const long arg);
             Flyer::FlyerValue& operator= (const unsigned long uarg);
+            Flyer::FlyerValue& operator= (const long long arg);
+            Flyer::FlyerValue& operator= (const unsigned long long uarg);
             Flyer::FlyerValue& operator= (const float arg);
         private:
             void clear();

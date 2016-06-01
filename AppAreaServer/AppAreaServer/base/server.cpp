@@ -11,6 +11,7 @@
 #include "recycleThread.h"
 #include "mainThread.h"
 #include "verifyThread.h"
+#include "redisMemManager.h"
 
 Server::Server(const std::string &name,const ProtoMsgData::ServerType &type) : m_name(name),m_type(type),m_id(0),m_port(0),m_fd(-1),m_epfd(-1),m_verify(false)
 {
@@ -52,6 +53,10 @@ bool Server::init()
             MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ClientHandle>(new ClientHandle()));
         }
         if(!loadConf())
+        {
+            break;
+        }
+        if(!RedisMemManager::getInstance().init())
         {
             break;
         }
