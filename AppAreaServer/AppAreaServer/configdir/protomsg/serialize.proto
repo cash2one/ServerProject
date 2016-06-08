@@ -1,7 +1,0 @@
-package ProtoMsgData;
-
-message UserBinary
-{
-	 optional string phone = 1;
-	 optional uint64 charid = 2;
-}
