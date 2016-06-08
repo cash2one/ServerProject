@@ -55,6 +55,8 @@ def parse_xml_node_attr(file,node,protoCode):
                 print "警告: %s 文件 %s 节点 %s 属性重名" %(file,sub_node.nodeName,sub_name)
                 continue
             sub_attrMap[sub_name] = sub_value
+        if sub_attrMap.has_key("default") and len(sub_attrMap["default"]) == 0:
+            sub_attrMap["default"] = "\"\""
         if node.nodeName != "enum":
             if not sub_attrMap.has_key("name") or not sub_attrMap.has_key("type"):
                 print "警告: %s 文件 %s 节点 %s 子节点 没有name或者type属性名" %(file,node.nodeName,sub_node.nodeName)
@@ -77,8 +79,10 @@ def parse_xml_node_attr(file,node,protoCode):
                 if not prefix in ["required","optional","repeated"]:
                     print "警告: %s 文件 %s 节点 %s 子节点 message 没有prefix属性值 %s 错误" %(file,node.nodeName,sub_node.nodeName,prefix)
                     continue
-            
-                protoCode += "\t %s %s %s = %d;\n" %(sub_attrMap["prefix"],sub_attrMap["type"],sub_attrMap["name"],order)
+                if not sub_attrMap.has_key("default"):
+                    protoCode += "\t %s %s %s = %d;\n" %(sub_attrMap["prefix"],sub_attrMap["type"],sub_attrMap["name"],order)
+                else:
+                    protoCode += "\t %s %s %s = %d [default = %s];\n" %(sub_attrMap["prefix"],sub_attrMap["type"],sub_attrMap["name"],order,sub_attrMap["default"])
             order += 1
         else:
             if not sub_attrMap.has_key("name") or not sub_attrMap.has_key("value"):
@@ -89,6 +93,20 @@ def parse_xml_node_attr(file,node,protoCode):
     result[0] = True
     result.append(protoCode)
     return result
+
+
+#解析import属性节点
+def parse_xml_import_node(file,node,protoCode):
+    for sub_node in node.childNodes:
+        if sub_node.nodeName == "#text":
+            continue
+        if sub_node.nodeName != "member":
+            print "警告: %s 文件 %s 节点的子节点名 %s 不是member" %(file,node.nodeName,sub_node.nodeName)
+            continue
+        for sub_name,sub_value in sub_node.attributes.items():
+            if sub_name == "name":
+                protoCode += "import \"%s.proto\";\n" %(sub_value)
+    return protoCode 
 
 
 
@@ -102,6 +120,9 @@ def parse_xml_node(file,root):
     for node in root.childNodes:
         if node.nodeType != node.ELEMENT_NODE:
             continue
+        if node.nodeName == "import":
+            protoCode = parse_xml_import_node(file,node,protoCode)
+            continue 
         ret = parse_xml_node_attr(file,node,protoCode)
         if ret[0]:
             protoCode = ret[1]

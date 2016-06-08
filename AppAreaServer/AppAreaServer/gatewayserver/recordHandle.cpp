@@ -14,6 +14,14 @@ bool RecordHandle::init()
     {\
         boost::shared_ptr<MsgCallBack<boost::shared_ptr<RecordClient>,ProtoMsgData::msg> > callBack(new MsgCallBack<boost::shared_ptr<RecordClient>,ProtoMsgData::msg>(&RecordHandle::call));\
     }
+    MESSAGE_INIT(AckCreateUser,ackCreateUser);
 #undef MESSAGE_INIT
     return true;
+}
+
+bool RecordHandle::ackCreateUser(boost::shared_ptr<RecordClient> recordClient,boost::shared_ptr<ProtoMsgData::AckCreateUser> message)
+{
+    boost::shared_ptr<Connect> task = TaskManager::getInstance().getTask(message->id());
+    boost::shared_ptr<GatewayTask> gatewayTask = boost::dynaimc_pointer_cast<GatewayTask>(task);
+    return gatewayTask ? gatewayTask->ackCreateUser(message) : false;
 }

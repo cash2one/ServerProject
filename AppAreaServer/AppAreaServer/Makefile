@@ -7,7 +7,7 @@ WARNING_OPT = -g -Wall -Werror -Wno-unused-local-typedefs -Wno-narrowing -Wno-de
 #debug模式
 MACRO_OPT = -D_DEBUG_WCX -D_ZYZ_DEBUG -D_DEBUG_LBS -D_USE_CMD_NAMESPACE  -D_USE_EPOLL_ -D_GNU_SOURCE -D_REENTRANT -D_USE_GCC_4
 #需要include进来的路径
-DIR_OPT = -I/usr/gcc/lib/gcc/x86_64-unknown-linux-gnu/5.3.0/include/ -I/usr/local/protobuf/include/ -I/usr/include/libxml2/ -I/usr/local/include/ -I/usr/local/mysql/include/ -I../protocpp -I../base -I../excelcode
+DIR_OPT = -I/usr/local/include/hiredis/ -I/usr/gcc/lib/gcc/x86_64-unknown-linux-gnu/5.3.0/include/ -I/usr/local/protobuf/include/ -I/usr/include/libxml2/ -I/usr/local/include/ -I/usr/local/mysql/include/ -I../protocpp -I../base -I../excelcode
 #debug编译选项
 DEBUG_OPT = $(WARNING_OPT) $(MACRO_OPT) $(DIR_OPT)
 #编译库文件路径

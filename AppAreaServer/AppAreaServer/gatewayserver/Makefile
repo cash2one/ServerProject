@@ -12,7 +12,9 @@ src = gatewayServer.cpp\
 	  recordClient.cpp\
 	  recordHandle.cpp\
 	  sceneClient.cpp\
-	  sceneHandle.cpp
+	  sceneHandle.cpp\
+	  gatewayTask.cpp\
+	  gatewayHandle.cpp
 
 object = $(patsubst %.cpp,%.o,$(src))
 depend = $(patsubst %.cpp,%.d,$(src))

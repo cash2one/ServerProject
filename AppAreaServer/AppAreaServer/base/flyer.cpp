@@ -4,9 +4,11 @@ namespace Flyer
 {
     log4cxx::LoggerPtr logger;
     unsigned int seed;
+    unsigned long msglen;
     std::map<std::string,std::string> globalConfMap;
     void init()
     {
+        msglen = 10240;
         seed = 0;
         globalConfMap.clear();
     }

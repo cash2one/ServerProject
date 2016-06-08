@@ -23,6 +23,8 @@ class ClientManager : public Thread,public TaskQueue,public Singleton<ClientMana
         bool init();
         //检查是否连上
         int checkStatus(const unsigned int num,const ProtoMsgData::ServerType &serverType);
+        boost::shared_ptr<Client> getClientByType(const ProtoMsgData::serverType)
+{
 };
 
 #endif

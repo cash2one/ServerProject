@@ -9,6 +9,7 @@ namespace Flyer
 {
     extern log4cxx::LoggerPtr logger;
     extern unsigned int seed; 
+    extern unsigned long msglen;
     //全局属性键值对
     extern std::map<std::string,std::string> globalConfMap;
     //初始化全局变量
