@@ -10,7 +10,8 @@ FLYER_LIB = ../protocpp/libproto.a ../base/libbase.a ../excelcode/libexcel.a
 src = recordServer.cpp\
 	  recordTimeTick.cpp\
 	  recordTask.cpp\
-	  recordHandle.cpp
+	  recordHandle.cpp\
+	  recordDataManager.cpp
 
 object = $(patsubst %.cpp,%.o,$(src))
 depend = $(patsubst %.cpp,%.d,$(src))

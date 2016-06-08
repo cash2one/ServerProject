@@ -10,6 +10,9 @@ class RecordHandle : public MessageHandle
         RecordHandle();
         ~RecordHandle();
         virtual bool init();
+    public:
+        static bool ackCreateUser(boost::shared_ptr<RecordClient> recordClient,boost::shared_ptr<ProtoMsgData::AckCreateUser> message)
+{
 };
 
 #endif

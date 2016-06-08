@@ -14,6 +14,7 @@ class RecordTask : public Connect
     public:
         virtual MsgRet dispatcher(boost::shared_ptr<google::protobuf::Message> message);
         bool verify(const ProtoMsgData::ServerInfo &serverInfo);
+        bool createUser(boost::shared_ptr<ReqCreateUser> message);
     public:
         static RecordMessageDispatcher s_recordMsgDispatcher;
 };

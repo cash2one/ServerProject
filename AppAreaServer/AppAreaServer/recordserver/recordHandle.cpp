@@ -16,6 +16,7 @@ bool RecordHandle::init()
     RecordTask::s_recordMsgDispatcher.messageReg<ProtoMsgData::msg>(callBack);\
 }
     MESSAGE_INIT(ReqVerifyServer,reqVerifyServer);
+    MESSAGE_INIT(ReqCreateUser,reqCreateUser);
 
 #undef MESSAGE_INIT
 
@@ -25,4 +26,9 @@ bool RecordHandle::init()
 bool RecordHandle::reqVerifyServer(boost::shared_ptr<RecordTask> recordTask,const boost::shared_ptr<ProtoMsgData::ReqVerifyServer> message)
 {
     return recordTask->verify(message->serverinfo());
+}
+
+bool RecordHandle::reqCreateUser(boost::shared_ptr<RecordTask> recordTask,const boost::shared_ptr<ProtoMsgData::ReqCreateUser> message)
+{
+    return recordTask->createUser(message);
 }

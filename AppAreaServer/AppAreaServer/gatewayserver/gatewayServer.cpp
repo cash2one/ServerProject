@@ -8,6 +8,8 @@
 #include "sceneClient.h"
 #include "recordHandle.h"
 #include "sceneHandle.h"
+#include "redisMemManager.h"
+#include "system.pb.h"
 
 GatewayServer::GatewayServer() : Server("网关服务器",ProtoMsgData::ST_Gateway)
 {
@@ -52,6 +54,32 @@ bool GatewayServer::init()
             break;
         }
         if(!initConnectServer<SceneClient>(ProtoMsgData::ST_Scene,ProtoMsgData::ST_Gateway))
+        {
+            break;
+        }
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
+        if(!redisMem)
+        {
+            break;
+        }
+        ProtoMsgData::GatewayInfo gateInfo;
+        gateInfo.set_id(m_id);
+        gateInfo.set_ip(m_ip);
+        gateInfo.set_port(m_port);
+        gateInfo.set_person(0);
+        gateInfo.set_status(ProtoMsgData::GS_Normal);
+        char temp[Flyer::msglen] = {0};
+        gateInfo.SerializeToArray(temp,Flyer::msglen);
+        if(!redisMem->setSet("gateway","idset",m_id))
+        {
+            break;
+        }
+        redisMem = RedisMemManager::getInstance().getRedis(m_id);
+        if(!redisMem)
+        {
+            break;
+        }
+        if(!redisMem->setBin("gatewayinfo",m_id,temp,gateInfo.ByteSize()))
         {
             break;
         }

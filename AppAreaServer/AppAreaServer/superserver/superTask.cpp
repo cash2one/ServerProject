@@ -218,12 +218,9 @@ bool SuperTask::notifyMe()
     return true;
 }
 
-
-
 bool SuperTask::verify(const ProtoMsgData::ServerType &serverType)
 {
     bool ret = false;
-    std::vector<std::map<std::string,Flyer::FlyerValue> > ipVec;
     do
     {
         if(!verifyIp(serverType))

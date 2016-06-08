@@ -40,4 +40,25 @@ bool RecordTask::verify(const ProtoMsgData::ServerInfo &serverInfo)
     return ret;
 }
 
+bool RecordTask::createUser(boost::shared_ptr<ReqCreateUser> message)
+{
+    bool ret = false;
+    unsigned long charID = 0;
+    do
+    {
+        if(!RecordDataManager::getInstance().createUser(message->phone(),charID))
+        {
+            break;
+        }
+        ret = true;
+    }while(false);
+    ProtoMsgData::AckCreateUser ackMsg;
+    ackMsg.set_code(ProtoMsgData::EC_Default);
+    ackMsg.set_phone(message->phone());
+    ackMsg.set_charid(charID);
+    ackMsg.set_id(message->id());
+    sendMsg(ackMsg);
+    return ret;
+}
+
 
