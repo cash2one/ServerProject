@@ -3,6 +3,7 @@
 #include "mysqlPool.h"
 #include "recordServer.h"
 #include "taskManager.h"
+#include "recordDataManager.h"
 
 RecordMessageDispatcher RecordTask::s_recordMsgDispatcher("档案服务器消息处理器");
 
@@ -40,7 +41,7 @@ bool RecordTask::verify(const ProtoMsgData::ServerInfo &serverInfo)
     return ret;
 }
 
-bool RecordTask::createUser(boost::shared_ptr<ReqCreateUser> message)
+bool RecordTask::createUser(boost::shared_ptr<ProtoMsgData::ReqCreateUser> message)
 {
     bool ret = false;
     unsigned long charID = 0;

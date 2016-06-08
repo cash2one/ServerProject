@@ -1,4 +1,6 @@
 #include "recordHandle.h"
+#include "taskManager.h"
+#include "gatewayTask.h"
 
 RecordHandle::RecordHandle() : MessageHandle("档案服客户端消息处理")
 {
@@ -22,6 +24,6 @@ bool RecordHandle::init()
 bool RecordHandle::ackCreateUser(boost::shared_ptr<RecordClient> recordClient,boost::shared_ptr<ProtoMsgData::AckCreateUser> message)
 {
     boost::shared_ptr<Connect> task = TaskManager::getInstance().getTask(message->id());
-    boost::shared_ptr<GatewayTask> gatewayTask = boost::dynaimc_pointer_cast<GatewayTask>(task);
+    boost::shared_ptr<GatewayTask> gatewayTask = boost::dynamic_pointer_cast<GatewayTask>(task);
     return gatewayTask ? gatewayTask->ackCreateUser(message) : false;
 }

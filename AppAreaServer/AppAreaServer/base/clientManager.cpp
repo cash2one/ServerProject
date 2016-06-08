@@ -146,9 +146,9 @@ void ClientManager::run()
     m_clientMap.clear();
 }
 
-boost::shared_ptr<Client> ClientManager::getClientByType(const ProtoMsgData::serverType)
+boost::shared_ptr<Client> ClientManager::getClientByType(const ProtoMsgData::ServerType serverType)
 {
-    fot(auto iter = m_clientMap.begin();iter != m_clientMap.end();++iter)
+    for(auto iter = m_clientMap.begin();iter != m_clientMap.end();++iter)
     {
         boost::shared_ptr<Client> client = iter->second;
         if(client->getServerType() == serverType)
@@ -156,7 +156,7 @@ boost::shared_ptr<Client> ClientManager::getClientByType(const ProtoMsgData::ser
             return client;
         }
     }
-    return oost::shared_ptr<Client>(NULL);
+    return boost::shared_ptr<Client>(NULL);
 }
 
 

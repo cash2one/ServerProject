@@ -4,6 +4,8 @@
 #include "common.pb.h"
 #include "taskManager.h"
 #include "redisMemManager.h"
+#include "clientManager.h"
+#include "recycleThread.h"
 
 GatewayMessageDispatcher GatewayTask::s_gatewayMsgDispatcher("网关服务器消息处理器");
 GatewayTask::GatewayTask(const int fd) : Connect(fd),m_charID(0)
@@ -101,7 +103,7 @@ bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> 
     return ret;
 }
 
-bool gatewayTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> message)
+bool GatewayTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> message)
 {
     bool ret = false;
     do

@@ -13,8 +13,8 @@ class RecordHandle : public MessageHandle
     public:
         static bool reqVerifyServer(boost::shared_ptr<RecordTask> serverTask,const boost::shared_ptr<ProtoMsgData::ReqVerifyServer> message);
 
-        static bool reqCreateUser(boost::shared_ptr<RecordTask> recordTask,const boost::shared_ptr<ProtoMsgData::ReqCreateUser> message)
-{
+        static bool reqCreateUser(boost::shared_ptr<RecordTask> recordTask,const boost::shared_ptr<ProtoMsgData::ReqCreateUser> message);
+
 };
 
 #endif
