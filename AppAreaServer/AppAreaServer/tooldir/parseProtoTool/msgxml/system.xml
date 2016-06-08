@@ -1,5 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <protocol>	
+    <import>
+        <member name="common" desc="公共对应的proto"/>
+    </import>
+
     <enum name="ServerType" desc="服务器类型">
         <member name="ST_Client" value="0" desc="客户端"/>
         <member name="ST_Login" value="1" desc="登陆服务器"/>
@@ -51,6 +55,34 @@
         <member name="ret" prefix="optional" type="bool" desc="是否可连接"/>
     </proto>
     
+    <enum name="GatewayStatus" desc="网关状态">
+        <member name="GS_Close" value="0" desc="没开"/>
+        <member name="GS_Normal" value="1" desc="正常"/>
+        <member name="GS_Full" value="2" desc="爆满"/>
+    </enum>
+    
+    <proto name="GatewayInfo" desc="网关数据">
+        <member name="id" prefix="optional" type="uint32" desc="id"/>
+        <member name="ip" prefix="optional" type="string" desc="ip"/>
+        <member name="port" prefix="optional" type="uint32" desc="端口"/>
+        <member name="person" prefix="optional" type="uint32" desc="人数"/>
+        <member name="status" prefix="optional" type="GatewayStatus" desc="状态"/>
+    </proto>
+
+    <proto name="ReqCreateUser" desc="请求创造角色">
+        <member name="phone" prefix="optional" type="string" desc="手机号"/>
+        <member name="id" prefix="optional" type="uint64" desc="连接id"/>
+    </proto>
+    
+    <proto name="AckCreateUser" desc="创造角色回应">
+        <member name="code" prefix="optional" type="ErrorCode" desc="错误码"/>
+        <member name="phone" prefix="optional" type="string" desc="手机号"/>
+        <member name="id" prefix="optional" type="uint64" desc="连接id"/>
+        <member name="charid" prefix="optional" type="uint64" desc="角色id"/>
+    </proto>
+
+
+
 
 
 

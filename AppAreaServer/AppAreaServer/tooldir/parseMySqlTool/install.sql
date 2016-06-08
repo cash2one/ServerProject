@@ -31,3 +31,15 @@ CREATE TABLE IF NOT EXISTS t_register
     PRIMARY KEY(id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+#flyer   201606-07-21 角色表
+DROP TABLE IF EXISTS `t_user`;
+CREATE TABLE IF NOT EXISTS t_user
+(
+    `charid` BIGINT(20) UNSIGNED NOT NULL,
+    `phone` varchar(20) NOT NULL,
+    `binary` blob, 
+    PRIMARY KEY(charid)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+

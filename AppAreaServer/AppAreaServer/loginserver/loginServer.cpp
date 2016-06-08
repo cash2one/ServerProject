@@ -11,6 +11,7 @@
 #include "mysqlPool.h"
 #include "excelBase.h"
 #include "redisMemManager.h"
+#include "loginHandle.h"
 
 LoginServer::LoginServer() :Server("登陆服务器",ProtoMsgData::ST_Login)
 {
@@ -34,6 +35,7 @@ bool LoginServer::init()
             break;
         }
         MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ServerHandle>(new ServerHandle()));
+        MessageHandleManager::getInstance().addHandle(boost::shared_ptr<LoginHandle>(new LoginHandle()));
         if(!MessageHandleManager::getInstance().init())
         {
             break;
@@ -151,13 +153,11 @@ bool LoginServer::loadAccount()
         boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
         if(!handle)
         {
-            Error(Flyer::logger,"111");
             break;
         }
         boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
         if(!redisMem)
         {
-            Error(Flyer::logger,"222");
             break;
         }
         std::vector<std::map<std::string,Flyer::FlyerValue> > ipVec;
@@ -165,7 +165,6 @@ bool LoginServer::loadAccount()
         snprintf(temp,sizeof(temp),"select phone,passwd from t_register");
         if(!handle->select(temp,strlen(temp),ipVec))
         {
-            Error(Flyer::logger,"333");
             break;
         }
         for(auto iter = ipVec.begin();iter != ipVec.end();++iter)

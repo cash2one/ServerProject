@@ -10,7 +10,9 @@ FLYER_LIB = ../protocpp/libproto.a ../base/libbase.a ../excelcode/libexcel.a
 src = loginServer.cpp\
 	  loginTimeTick.cpp\
 	  serverTask.cpp\
-	  serverHandle.cpp
+	  serverHandle.cpp\
+	  loginTask.cpp\
+	  loginHandle.cpp
 
 object = $(patsubst %.cpp,%.o,$(src))
 depend = $(patsubst %.cpp,%.d,$(src))

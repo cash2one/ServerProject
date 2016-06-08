@@ -1,9 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <protocol>	
-    <proto name="ReqTest" desc="请求测试">
-    </proto>
-
-    <proto name="AckTest" desc="回应测试">
+    <proto name="UserBinary" desc="角色存档二进制">
+        <member name="phone" prefix="optional" type="string" desc="手机号码"/>
+        <member name="charid" prefix="optional" type="uint64" desc="角色ID"/>
     </proto>
 </protocol>
 
