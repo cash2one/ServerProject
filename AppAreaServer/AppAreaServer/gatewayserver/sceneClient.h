@@ -13,6 +13,8 @@ class SceneClient : public Client
         virtual MsgRet dispatcher(boost::shared_ptr<google::protobuf::Message> message);
     public:
         static SceneClientMessageDispatcher s_sceneClientMsgDispatcher;
+    public:
+        static bool ackUserMsg(boost::shared_ptr<ProtoMsgData::AckLoginScene> message);
 };
 
 #endif

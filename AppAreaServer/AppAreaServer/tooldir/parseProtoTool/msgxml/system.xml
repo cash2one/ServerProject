@@ -80,6 +80,30 @@
         <member name="id" prefix="optional" type="uint64" desc="连接id"/>
         <member name="charid" prefix="optional" type="uint64" desc="角色id"/>
     </proto>
+   
+    <proto name="SceneInfo" desc="场景服务器数据">
+        <member name="id" prefix="optional" type="uint32" desc="id"/>
+        <member name="person" prefix="optional" type="uint32" desc="人数"/>
+        <member name="status" prefix="optional" type="GatewayStatus" desc="状态"/>
+    </proto>
+    
+    <proto name="ReqLoginScene" desc="登录场景">
+        <member name="charid" prefix="optional" type="uint64" desc="角色ID"/>
+    </proto>
+    <proto name="AckLoginScene" desc="登录场景">
+        <member name="charid" prefix="optional" type="uint64" desc="角色ID"/>
+        <member name="ret" prefix="optional" type="bool" desc="结果"/>
+    </proto>
+    
+    
+    <proto name="AckUserMsg" desc="场景发送给客户端消息">
+        <member name="charid" prefix="optional" type="uint64" desc="角色ID"/>
+        <member name="data" prefix="optional" type="bytes" desc="二进制消息包"/>
+    </proto>
+
+
+
+
 
 
 

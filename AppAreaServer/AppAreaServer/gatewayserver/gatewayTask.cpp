@@ -6,9 +6,10 @@
 #include "redisMemManager.h"
 #include "clientManager.h"
 #include "recycleThread.h"
+#include "gatewayServer.h"
 
 GatewayMessageDispatcher GatewayTask::s_gatewayMsgDispatcher("网关服务器消息处理器");
-GatewayTask::GatewayTask(const int fd) : Connect(fd),m_charID(0)
+GatewayTask::GatewayTask(const int fd) : Connect(fd),m_charID(0),m_isLogin(false)
 {
 }
 
@@ -44,12 +45,8 @@ bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> 
             code = ProtoMsgData::EC_Passwd_Wrong;
             break;
         }
-        std::set<unsigned long> idSet;
-        if(!redisMem->getSet("gateway","idset",idSet))
-        {
-            break;
-        }
-        redisMem = RedisMemManager::getInstance().getRedis(m_id);
+        unsigned int serverID = GatewayServer::getInstance().getServerID();
+        redisMem = RedisMemManager::getInstance().getRedis(serverID);
         if(!redisMem)
         {
             break;
@@ -81,7 +78,35 @@ bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> 
         else
         {
             m_charID = charID;
+            if(!TaskManager::getInstance().addGatewayTask(m_charID,m_id))
+            {
+                break;
+            }
         }
+        redisMem = RedisMemManager::getInstance().getRedis(serverID);
+        if(!redisMem)
+        {
+            break;
+        }
+        char temp[Flyer::msglen] = {0};
+        unsigned int size = redisMem->getBin("gateway",serverID,temp);
+        ProtoMsgData::GatewayInfo gateInfo;
+        try
+        {
+            gateInfo.ParseFromArray(temp,size);
+        }
+        catch(...)
+        {
+            break;
+        }
+        gateInfo.set_person(gateInfo.person() + 1);
+        bzero(temp,sizeof(temp));
+        gateInfo.SerializeToArray(temp,sizeof(temp));
+        if(!redisMem->setBin("gateway",serverID,temp,gateInfo.ByteSize()))
+        {
+            break;
+        }
+        m_isLogin = true;
         ret = true;
     }while(false);
     if(code != ProtoMsgData::EC_Default)
@@ -95,11 +120,73 @@ bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> 
         ProtoMsgData::AckLoginGateway ackMsg;
         ackMsg.set_ret(ret);
         sendMsg(ackMsg);
+        loginScene();
     }
     if(ret)
     {
         nextStatus();
     }
+    return ret;
+}
+
+bool GatewayTask::loginScene()
+{
+    bool ret = false;
+    do
+    {
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
+        if(!redisMem)
+        {
+            break;
+        }
+        std::set<unsigned long> idSet;
+        if(!redisMem->getSet("scene","idset",idSet))
+        {
+            break;
+        }
+        unsigned short sceneID = 0;
+        unsigned long num = 0;
+        for(auto iter = idSet.begin();iter != idSet.end();++iter)
+        {
+            boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis(*iter);
+            if(!redisMem)
+            {
+                break;
+            }
+            char temp[Flyer::msglen] = {0};
+            unsigned size = redisMem->getBin("scene",*iter,temp);
+            ProtoMsgData::SceneInfo sceneInfo;
+            try
+            {
+                sceneInfo.ParseFromArray(temp,size);
+            }
+            catch(...)
+            {
+                break;
+            }
+            if(sceneInfo.status() == ProtoMsgData::GS_Normal)
+            {
+                if(!num || num > sceneInfo.person())
+                {
+                    num = sceneInfo.person();
+                    sceneID = sceneInfo.id();
+                }
+            }
+        }
+        if(!sceneID)
+        {
+            break;
+        }
+        boost::shared_ptr<Client> client = ClientManager::getInstance().getServerClient(sceneID);
+        if(!client)
+        {
+            break;
+        }
+        ProtoMsgData::ReqLoginScene reqMsg;
+        reqMsg.set_charid(m_charID);
+        client->sendMsg(reqMsg);
+        ret = true;
+    }while(false);
     return ret;
 }
 
@@ -120,6 +207,10 @@ bool GatewayTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> m
             break;
         }
         m_charID = message->charid();
+        if(!TaskManager::getInstance().addGatewayTask(m_charID,m_id))
+        {
+            break;
+        }
         ret = true;
     }while(false);
 
@@ -134,5 +225,41 @@ bool GatewayTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> m
             RecycleThread::getInstance().add(connect);
         }
     }
+    else
+    {
+        loginScene();
+    }
     return ret;
+}
+
+void GatewayTask::disConnect()
+{
+    do
+    {
+        unsigned int serverID = GatewayServer::getInstance().getServerID();
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis(serverID);
+        if(!redisMem)
+        {
+            break;
+        }
+        char temp[Flyer::msglen] = {0};
+        unsigned int size = redisMem->getBin("gateway",serverID,temp);
+        ProtoMsgData::GatewayInfo gateInfo;
+        try
+        {
+            gateInfo.ParseFromArray(temp,size);
+        }
+        catch(...)
+        {
+            break;
+        }
+        gateInfo.set_person(gateInfo.person() - 1);
+        bzero(temp,sizeof(temp));
+        gateInfo.SerializeToArray(temp,sizeof(temp));
+        if(!redisMem->setBin("gateway",serverID,temp,gateInfo.ByteSize()))
+        {
+            break;
+        }
+        m_isLogin = false;
+    }while(false);
 }

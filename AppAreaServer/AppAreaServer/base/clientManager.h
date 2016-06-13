@@ -19,6 +19,7 @@ class ClientManager : public Thread,public TaskQueue,public Singleton<ClientMana
     public:
         virtual bool add(boost::shared_ptr<Client> client);
         boost::shared_ptr<Client> getClient(const unsigned long id);
+        boost::shared_ptr<Client> getServerClient(const unsigned short id);
         virtual void run();
         bool init();
         //检查是否连上

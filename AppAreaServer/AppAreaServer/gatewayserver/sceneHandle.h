@@ -10,6 +10,8 @@ class SceneHandle : public MessageHandle
         SceneHandle();
         ~SceneHandle();
         virtual bool init();
+    public:
+        static bool ackLoginScene(boost::shared_ptr<SceneClient> sceneClient,const boost::shared_ptr<ProtoMsgData::AckLoginScene> message);
 };
 
 #endif

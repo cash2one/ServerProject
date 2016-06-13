@@ -7,23 +7,6 @@ bool TaskManager::addTask(boost::shared_ptr<Connect> task)
     return ret.second;
 }
 
-void TaskManager::randSendMsg(const unsigned long cnt)
-{
-    Debug(Flyer::logger,"随机批量发送消息开始(" << cnt << ")");
-    for(unsigned long num = 0;num < cnt;)
-    {
-        int randID = Flyer::randBetween(1,m_taskMap.size());
-        auto iter = m_taskMap.find(randID);
-        if(iter != m_taskMap.end())
-        {
-            boost::shared_ptr<Connect> task = iter->second;
-            task->sendMsg();
-            ++num;
-        }
-    }
-    Debug(Flyer::logger,"随机批量发送结束开始(" << cnt << ")");
-}
-
 void TaskManager::randCloseFd(const unsigned long cnt)
 {
     Debug(Flyer::logger,"随机批量断开连接开始(" << cnt << ")");
@@ -114,3 +97,35 @@ void TaskManager::sendHeartMsg()
         }
     }
 }
+
+bool TaskManager::addGatewayTask(const unsigned charID,const unsigned long id)
+{
+    bool ret = false;
+    do
+    {
+        boost::shared_ptr<Connect> task = getTask(id);
+        if(!task)
+        {
+            break;
+        }
+        if(m_charIDMap.find(charID) != m_charIDMap.end())
+        {
+            break;
+        }
+        m_charIDMap.insert(std::pair<unsigned long,boost::shared_ptr<Connect> >(charID,task));
+        ret = true;
+    }while(false);
+    return ret;
+}
+
+boost::shared_ptr<Connect> TaskManager::getGatewayTask(const unsigned charID)
+{
+    auto iter = m_charIDMap.find(charID);
+    if(iter != m_charIDMap.end())
+    {
+        return iter->second;
+    }
+    return boost::shared_ptr<Connect>(NULL);
+}
+
+

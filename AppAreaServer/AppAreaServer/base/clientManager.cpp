@@ -159,4 +159,17 @@ boost::shared_ptr<Client> ClientManager::getClientByType(const ProtoMsgData::Ser
     return boost::shared_ptr<Client>(NULL);
 }
 
+boost::shared_ptr<Client> ClientManager::getServerClient(const unsigned short id)
+{
+    for(auto iter = m_clientMap.begin();iter != m_clientMap.end();++iter)
+    {
+        boost::shared_ptr<Client> client = iter->second;
+        if(client->getServerID() == id)
+        {
+            return client;
+        }
+    }
+    return boost::shared_ptr<Client>(NULL);
+}
+
 

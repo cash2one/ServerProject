@@ -79,7 +79,7 @@ bool GatewayServer::init()
         {
             break;
         }
-        if(!redisMem->setBin("gatewayinfo",m_id,temp,gateInfo.ByteSize()))
+        if(!redisMem->setBin("gateway",m_id,temp,gateInfo.ByteSize()))
         {
             break;
         }

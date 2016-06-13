@@ -39,6 +39,11 @@ class Connect : private DisCopy
             snprintf(temp,sizeof(temp),"析构连接(%lu)",getID());
             LOG4CXX_INFO(Flyer::logger,temp);
         }
+        //断开连接之前的处理
+        virtual void disConnect()
+        {
+            return;
+        }
         inline unsigned long getID() const
         {
             return m_id;
@@ -65,7 +70,6 @@ class Connect : private DisCopy
         }
         void addEpoll(const int epfd,const unsigned long event); 
         void delEpoll(const int epfd,const unsigned long events);
-        void sendMsg();
         bool accpetMsg();
         void closeFd();
         void doAcceptMessage();

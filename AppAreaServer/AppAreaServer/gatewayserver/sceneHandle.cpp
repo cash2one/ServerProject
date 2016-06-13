@@ -13,8 +13,14 @@ bool SceneHandle::init()
 #define MESSAGE_INIT(msg,call) \
     {\
         boost::shared_ptr<MsgCallBack<boost::shared_ptr<SceneClient>,ProtoMsgData::msg> > callBack(new MsgCallBack<boost::shared_ptr<SceneClient>,ProtoMsgData::msg>(&SceneHandle::call));\
-        SceneTask::s_sceneMsgDispatcher.messageReg<ProtoMsgData::msg>(callBack);\
+        SceneClient::s_sceneClientMsgDispatcher.messageReg<ProtoMsgData::msg>(callBack);\
     }
+    MESSAGE_INIT(AckLoginScene,ackLoginScene);
 #undef MESSAGE_INIT
     return true;
+}
+
+bool SceneHandle::ackLoginScene(boost::shared_ptr<SceneClient> sceneClient,const boost::shared_ptr<ProtoMsgData::AckLoginScene> message)
+{
+    return false;
 }

@@ -71,19 +71,9 @@ bool Connect::accpetMsg()
     return ret;
 }
 
-void Connect::sendMsg()
-{
-#if 0
-    ProtoMsgData::ReqTest test;
-    std::string ret;
-    encodeMessage(&test,ret);
-    send(m_socket,ret.c_str(),ret.size(),0);
-    Debug(Flyer::logger,"发送消息(" << m_id << "," << test.GetTypeName() << ")");
-#endif
-}
-
 void Connect::closeFd()
 {
+    disConnect();
     Info(Flyer::logger,"断开连接(" << getID() << ")");
     if(m_socket != -1)
     {

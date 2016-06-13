@@ -104,7 +104,7 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
                 break;
             }
             char temp[Flyer::msglen] = {0};
-            unsigned int len = redisMem->getBin("gatewayinfo",*iter,temp);
+            unsigned int len = redisMem->getBin("gateway",*iter,temp);
             ProtoMsgData::GatewayInfo gateInfo;
             gateInfo.ParseFromArray(temp,len);
             if(gateInfo.status() == ProtoMsgData::GS_Normal && gateInfo.person() <= lessNum)
