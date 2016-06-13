@@ -14,6 +14,7 @@ class SceneTask : public Connect
     public:
         virtual MsgRet dispatcher(boost::shared_ptr<google::protobuf::Message> message);
         bool verify(const ProtoMsgData::ServerInfo &serverInfo);
+        bool login(const unsigned long charID);
     public:
         static SceneMessageDispatcher s_sceneMsgDispatcher;
 };

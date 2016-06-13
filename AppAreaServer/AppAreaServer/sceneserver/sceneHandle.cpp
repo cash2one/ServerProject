@@ -16,6 +16,7 @@ bool SceneHandle::init()
     SceneTask::s_sceneMsgDispatcher.messageReg<ProtoMsgData::msg>(callBack);\
 }
     MESSAGE_INIT(ReqVerifyServer,reqVerifyServer);
+    MESSAGE_INIT(ReqLoginScene,reqLoginScene);
 
 #undef MESSAGE_INIT
 
@@ -25,4 +26,9 @@ bool SceneHandle::init()
 bool SceneHandle::reqVerifyServer(boost::shared_ptr<SceneTask> sceneTask,const boost::shared_ptr<ProtoMsgData::ReqVerifyServer> message)
 {
     return sceneTask->verify(message->serverinfo());
+}
+
+bool SceneHandle::reqLoginScene(boost::shared_ptr<SceneTask> sceneTask,const boost::shared_ptr<ProtoMsgData::ReqLoginScene> message)
+{
+    return sceneTask->login(message->charid());
 }

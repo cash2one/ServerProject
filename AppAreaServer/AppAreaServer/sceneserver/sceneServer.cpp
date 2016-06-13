@@ -11,6 +11,7 @@
 #include "verifyThread.h"
 #include "sceneTask.h"
 #include "sceneHandle.h"
+#include "redisMemManager.h"
 
 SceneServer::SceneServer() : Server("场景服务器",ProtoMsgData::ST_Scene)
 {
@@ -51,6 +52,30 @@ bool SceneServer::init()
         }
         startThread();
         if(!initConnectServer<RecordClient>(ProtoMsgData::ST_Record,ProtoMsgData::ST_Scene))
+        {
+            break;
+        }
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
+        if(!redisMem)
+        {
+            break;
+        }
+        ProtoMsgData::SceneInfo sceneInfo;
+        sceneInfo.set_id(m_id);
+        sceneInfo.set_person(0);
+        sceneInfo.set_status(ProtoMsgData::GS_Normal);
+        char temp[Flyer::msglen] = {0};
+        sceneInfo.SerializeToArray(temp,Flyer::msglen);
+        if(!redisMem->setSet("scene","idset",m_id))
+        {
+            break;
+        }
+        redisMem = RedisMemManager::getInstance().getRedis(m_id);
+        if(!redisMem)
+        {
+            break;
+        }
+        if(!redisMem->setBin("scene",m_id,temp,sceneInfo.ByteSize()))
         {
             break;
         }

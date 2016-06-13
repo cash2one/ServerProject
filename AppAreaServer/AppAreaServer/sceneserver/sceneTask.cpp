@@ -3,6 +3,10 @@
 #include "mysqlPool.h"
 #include "sceneServer.h"
 #include "taskManager.h"
+#include "redisMemManager.h"
+#include "serialize.pb.h"
+#include "sceneUserManager.h"
+#include "system.pb.h"
 
 SceneMessageDispatcher SceneTask::s_sceneMsgDispatcher("场景服务器消息处理器");
 
@@ -23,7 +27,6 @@ MsgRet SceneTask::dispatcher(boost::shared_ptr<google::protobuf::Message> messag
 bool SceneTask::verify(const ProtoMsgData::ServerInfo &serverInfo)
 {
     bool ret = false;
-    std::vector<std::map<std::string,Flyer::FlyerValue> > ipVec;
     do
     {
         ProtoMsgData::AckVerifyServer ackMsg;
@@ -41,4 +44,42 @@ bool SceneTask::verify(const ProtoMsgData::ServerInfo &serverInfo)
     return ret;
 }
 
+bool SceneTask::login(const unsigned long charID)
+{
+    bool ret = false;
+    ProtoMsgData::AckLoginScene ackMsg;
+    do
+    {
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis(charID);
+        if(!redisMem)
+        {
+            break;
+        }
+        char buffer[Flyer::msglen] = {0};
+        unsigned long size = redisMem->getBin("userbinary",charID,buffer);
+        ProtoMsgData::UserBinary binary;
+        try
+        {
+            binary.ParseFromArray(buffer,size);
+        }
+        catch(...)
+        {
+            break;
+        }
+        boost::shared_ptr<SceneUser> user(new SceneUser(charID,m_serverID));
+        if(!user->parseFromBinary(binary))
+        {
+            break;
+        }
+        if(!SceneUserManager::getInstance().add(user))
+        {
+            break;
+        }
+        ret = true;
+    }while(false);
+    ackMsg.set_ret(ret);
+    ackMsg.set_charid(charID);
+    sendMsg(ackMsg);
+    return ret;
+}
 

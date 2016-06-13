@@ -12,6 +12,8 @@ class SceneHandle : public MessageHandle
         virtual bool init();
     public:
         static bool reqVerifyServer(boost::shared_ptr<SceneTask> sceneTask,const boost::shared_ptr<ProtoMsgData::ReqVerifyServer> message);
+        static bool reqLoginScene(boost::shared_ptr<SceneTask> sceneTask,const boost::shared_ptr<ProtoMsgData::ReqLoginScene> message);
+
 };
 
 #endif
