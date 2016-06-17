@@ -27,7 +27,7 @@ bool CmdFunManager::loadCmd(const char *fileName)
                 continue;
             }
             std::string temp = iter->second.get<std::string>("<xmlattr>.value");
-            unsigned short logicID = atol(temp.c_str());
+            unsigned char logicID = atol(temp.c_str());
             for(auto itr = iter->second.begin();itr != iter->second.end();++itr)
             {
                 if(itr->first == "<xmlattr>" || itr->first == "<xmlcomment>")
@@ -38,7 +38,7 @@ bool CmdFunManager::loadCmd(const char *fileName)
                 protoName += ".";
                 protoName += itr->second.get<std::string>("<xmlattr>.proto");
                 std::string temp = itr->second.get<std::string>("<xmlattr>.value");
-                unsigned short cmdID = atol(temp.c_str());
+                unsigned char cmdID = atol(temp.c_str());
                 unsigned int cmdKey = hashKey(logicID,cmdID);
                 m_cmdProtoNameMap.insert(std::pair<unsigned int,std::string>(cmdKey,protoName));
                 m_protoNameCmdMap.insert(std::pair<std::string,unsigned int>(protoName,cmdKey));

@@ -23,6 +23,9 @@ class Server
         int m_fd;
         int m_epfd;
         bool m_verify;
+        std::string m_outIp;
+        unsigned short m_outPort;
+        int m_outFd;
     private:
         int accept(std::map<int,int> &socketMap);
     public:
@@ -32,7 +35,7 @@ class Server
         void main();
         void setServerInfo(const ProtoMsgData::ServerInfo &serverInfo);
         bool getVerify() const;
-        virtual bool acceptConnect(const int socket) = 0;
+        virtual bool acceptConnect(const int socket,const int listenPort) = 0;
         ProtoMsgData::ServerType getType() const;
         static void loadExcelTbx(const std::string &file,char *&buf,int &size);
         virtual bool loadConf() = 0;

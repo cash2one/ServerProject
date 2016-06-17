@@ -51,21 +51,43 @@ bool LoginServer::init()
     return ret;
 }
 
-bool LoginServer::acceptConnect(const int socket)
+bool LoginServer::acceptConnect(const int socket,const int listenPort)
 {
     bool ret = false;
-    boost::shared_ptr<ServerTask> task(new ServerTask(socket));
-    if(TaskManager::getInstance().addTask(task))
+    do
     {
-        task->nextStatus();
-        ret = VerifyThread::getInstance().add(task);
-    }
-    if(!ret)
-    {
-        TaskManager::getInstance().eraseTask(task->getID());
-        task->setStatus(Task_Status_Recycle);
-        RecycleThread::getInstance().add(task);
-    }
+        if(listenPort == m_port)
+        {
+            boost::shared_ptr<ServerTask> task(new ServerTask(socket));
+            if(TaskManager::getInstance().addTask(task))
+            {
+                task->nextStatus();
+                ret = VerifyThread::getInstance().add(task);
+            }
+            else
+            {
+                TaskManager::getInstance().eraseTask(task->getID());
+                task->setStatus(Task_Status_Recycle);
+                RecycleThread::getInstance().add(task);
+            }
+        }
+        else
+        {
+            boost::shared_ptr<LoginTask> task(new LoginTask(socket));
+            if(TaskManager::getInstance().addTask(task))
+            {
+                task->nextStatus();
+                ret = VerifyThread::getInstance().add(task);
+            }
+            else
+            {
+                TaskManager::getInstance().eraseTask(task->getID());
+                task->setStatus(Task_Status_Recycle);
+                RecycleThread::getInstance().add(task);
+            }
+        }
+        ret = true;
+    }while(false);
     return ret;
 }
 
@@ -81,7 +103,7 @@ bool LoginServer::initLoginIp()
             break;
         }
         char temp[100] = {0};
-        snprintf(temp,sizeof(temp),"select id,ip,port from t_serverinfo where servertype = %u",ProtoMsgData::ST_Login);
+        snprintf(temp,sizeof(temp),"select id,ip,port,outip,outport from t_serverinfo where servertype = %u",ProtoMsgData::ST_Login);
         if(!handle->select(temp,strlen(temp),ipVec))
         {
             break;
@@ -96,6 +118,9 @@ bool LoginServer::initLoginIp()
             std::string ip = tempMap["ip"];
             m_ip = ip;
             m_port = tempMap["port"];
+            std::string outIp = tempMap["outip"];
+            m_outIp = outIp;
+            m_outPort = tempMap["outport"];
             if(!listenPort())
             {
                 break;

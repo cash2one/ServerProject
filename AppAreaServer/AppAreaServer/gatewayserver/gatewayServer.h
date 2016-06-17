@@ -12,7 +12,7 @@ class GatewayServer : public Server,public Singleton<GatewayServer>
     public:
         ~GatewayServer();
         bool init();
-        virtual bool acceptConnect(const int socket) 
+        virtual bool acceptConnect(const int socket,const int listenFd) 
         {
             return true;
         }

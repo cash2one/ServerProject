@@ -12,6 +12,7 @@ class GatewayHandle : public MessageHandle
         virtual bool init();
     public:
         static bool reqLoginGateway(boost::shared_ptr<GatewayTask> gatewayTask,const boost::shared_ptr<ProtoMsgData::ReqLoginGateway> message);
+        static bool ackHeartBeat(boost::shared_ptr<GatewayTask> gatewayTask,const boost::shared_ptr<ProtoMsgData::AckHeartBeat> message);
 
 };
 

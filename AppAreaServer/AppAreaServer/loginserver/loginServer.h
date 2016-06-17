@@ -14,7 +14,7 @@ class LoginServer : public Server,public Singleton<LoginServer>
         bool loadAccount();
     public:
         bool init();
-        virtual bool acceptConnect(const int socket);
+        virtual bool acceptConnect(const int socket,const int listenPort);
         bool initLoginIp();
         virtual bool loadConf();
         virtual bool end();

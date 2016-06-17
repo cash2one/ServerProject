@@ -38,7 +38,7 @@ bool LoginTask::registerAccount(boost::shared_ptr<ProtoMsgData::ReqRegister> mes
             break;
         }
         char temp[100] = {0};
-        snprintf(temp,sizeof(temp),"insert into t_register values(%s,%s)",message->phone().c_str(),message->passwd().c_str());
+        snprintf(temp,sizeof(temp),"insert into t_register(phone,passwd,regtime) values(%s,%s,current_timestamp)",message->phone().c_str(),message->passwd().c_str());
         boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
         if(!handle->execSql(temp,strlen(temp)))
         {

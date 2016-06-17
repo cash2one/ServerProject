@@ -39,6 +39,10 @@ CREATE TABLE IF NOT EXISTS t_user
     PRIMARY KEY(charid)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+#flyer   201606-07-21 添加外网ip
+alter table t_serverinfo add outip varchar(20) NOT NULL;
+#flyer   201606-07-21 添加外网端口
+alter table t_serverinfo add outport BIGINT(20) UNSIGNED NOT NULL;
 
 
 

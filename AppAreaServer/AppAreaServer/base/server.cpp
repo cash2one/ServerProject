@@ -13,7 +13,7 @@
 #include "verifyThread.h"
 #include "redisMemManager.h"
 
-Server::Server(const std::string &name,const ProtoMsgData::ServerType &type) : m_name(name),m_type(type),m_id(0),m_port(0),m_fd(-1),m_epfd(-1),m_verify(false)
+Server::Server(const std::string &name,const ProtoMsgData::ServerType &type) : m_name(name),m_type(type),m_id(0),m_port(0),m_fd(-1),m_epfd(-1),m_verify(false),m_outIp(),m_outPort(0),m_outFd(-1)
 {
     m_epfd = epoll_create(10);
 }
@@ -23,6 +23,10 @@ Server::~Server()
     if(m_fd != -1)
     {
         TEMP_FAILURE_RETRY(::close(m_fd));
+    }
+    if(m_outFd != -1)
+    {
+        TEMP_FAILURE_RETRY(::close(m_outFd));
     }
     TEMP_FAILURE_RETRY(::close(m_epfd));
 }
@@ -40,6 +44,7 @@ bool Server::init()
         {
             break;
         }
+        CmdFunManager::getInstance().logCmdMap();
         if(!MysqlPool::getInstance().addUrl(Flyer::globalConfMap["mysql"]))
         {
             break;
@@ -86,22 +91,52 @@ bool Server::listenPort()
         {
             break;
         }
-        m_socketPortMap.insert(std::pair<int,int>(m_fd,addr.sin_port));
+        m_socketPortMap.insert(std::pair<int,int>(m_fd,m_port));
         if(m_socketPortMap.size() > m_epollEventVec.size())
         {
             m_epollEventVec.resize(m_socketPortMap.size() + 3);
         }
-
         struct epoll_event event;
         event.events = EPOLLIN;
         event.data.fd = m_fd;
         epoll_ctl(m_epfd,EPOLL_CTL_ADD,m_fd,&event);
+
+        if(m_type != ProtoMsgData::ST_Login)
+        {
+            ret = true;
+            break;
+        }
+        if(!Client::setConnect(m_outFd))
+        {
+            break;
+        }
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = inet_addr(m_outIp.c_str());
+        addr.sin_port = htons(m_outPort);
+        if(-1 == ::bind(m_outFd,(struct sockaddr*)&addr,sizeof(struct sockaddr)))
+        {
+            break;
+        }
+        if(listen(m_outFd,20000) == -1)
+        {
+            break;
+        }
+        m_socketPortMap.insert(std::pair<int,int>(m_outFd,m_outPort));
+        if(m_socketPortMap.size() > m_epollEventVec.size())
+        {
+            m_epollEventVec.resize(m_socketPortMap.size() + 3);
+        }
+        event.events = EPOLLIN;
+        event.data.fd = m_outFd;
+        epoll_ctl(m_epfd,EPOLL_CTL_ADD,m_outFd,&event);
         ret = true;
     }while(0);
     if(!ret)
     {
         TEMP_FAILURE_RETRY(close(m_fd));
         m_fd = -1;
+        TEMP_FAILURE_RETRY(close(m_outFd));
+        m_outFd = -1;
     }
     return ret;
 }
@@ -126,7 +161,7 @@ void Server::serverCallBack()
     accept(socketMap);
     for(auto iter = socketMap.begin();iter != socketMap.end();++iter)
     {
-        acceptConnect(iter->first);
+        acceptConnect(iter->first,iter->second);
     }
     socketMap.clear();
     return ;

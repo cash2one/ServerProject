@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS t_serverinfo
     `ip` varchar(20) NOT NULL,
     `port` BIGINT(20) UNSIGNED NOT NULL,
     `name` varchar(20) NOT NULL,
+    `outip` varchar(20) NOT NULL,
+    `outport` BIGINT(20) UNSIGNED NOT NULL,
     PRIMARY KEY(id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
