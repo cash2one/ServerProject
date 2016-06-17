@@ -93,9 +93,13 @@ void RecordServer::endServerThread()
     RecordTimeTick::getInstance().end();
 }
 
-bool RecordServer::acceptConnect(const int socket)
+bool RecordServer::acceptConnect(const int socket,const int listenPort)
 {
     bool ret = false;
+    if(listenPort != m_port)
+    {
+        return ret;
+    }
     boost::shared_ptr<RecordTask> task(new RecordTask(socket));
     if(TaskManager::getInstance().addTask(task))
     {

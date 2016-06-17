@@ -17,6 +17,7 @@ bool SceneHandle::init()
 }
     MESSAGE_INIT(ReqVerifyServer,reqVerifyServer);
     MESSAGE_INIT(ReqLoginScene,reqLoginScene);
+    MESSAGE_INIT(AckHeartBeat,ackHeartBeat);
 
 #undef MESSAGE_INIT
 
@@ -31,4 +32,10 @@ bool SceneHandle::reqVerifyServer(boost::shared_ptr<SceneTask> sceneTask,const b
 bool SceneHandle::reqLoginScene(boost::shared_ptr<SceneTask> sceneTask,const boost::shared_ptr<ProtoMsgData::ReqLoginScene> message)
 {
     return sceneTask->login(message->charid());
+}
+
+bool SceneHandle::ackHeartBeat(boost::shared_ptr<SceneTask> sceneTask,const boost::shared_ptr<ProtoMsgData::AckHeartBeat> message)
+{
+    sceneTask->resetHeartTime();
+    return true;
 }

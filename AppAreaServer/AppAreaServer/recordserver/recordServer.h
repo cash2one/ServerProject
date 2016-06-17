@@ -12,7 +12,7 @@ class RecordServer : public Server,public Singleton<RecordServer>
     public:
         ~RecordServer();
         bool init();
-        virtual bool acceptConnect(const int socket);
+        virtual bool acceptConnect(const int socket,const int listenPort);
         virtual bool loadConf();
         virtual bool end();
         virtual void startServerThread();

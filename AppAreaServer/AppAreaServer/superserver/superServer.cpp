@@ -55,9 +55,13 @@ bool SuperServer::init()
     return ret;
 }
 
-bool SuperServer::acceptConnect(const int socket)
+bool SuperServer::acceptConnect(const int socket,const int listenPort)
 {
     bool ret = false;
+    if(listenPort != m_port)
+    {
+        return ret;
+    }
     boost::shared_ptr<SuperTask> task(new SuperTask(socket));
     if(TaskManager::getInstance().addTask(task))
     {

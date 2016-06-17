@@ -14,7 +14,7 @@ class SuperServer : public Server,public Singleton<SuperServer>
     public:
         ~SuperServer();
         bool init();
-        virtual bool acceptConnect(const int socket);
+        virtual bool acceptConnect(const int socket,const int listenPort);
         bool verify(const unsigned int id);
         virtual bool loadConf();
         virtual bool end();

@@ -17,7 +17,7 @@ bool RecordHandle::init()
 }
     MESSAGE_INIT(ReqVerifyServer,reqVerifyServer);
     MESSAGE_INIT(ReqCreateUser,reqCreateUser);
-
+    MESSAGE_INIT(AckHeartBeat,ackHeartBeat);
 #undef MESSAGE_INIT
 
     return true;
@@ -31,4 +31,10 @@ bool RecordHandle::reqVerifyServer(boost::shared_ptr<RecordTask> recordTask,cons
 bool RecordHandle::reqCreateUser(boost::shared_ptr<RecordTask> recordTask,const boost::shared_ptr<ProtoMsgData::ReqCreateUser> message)
 {
     return recordTask->createUser(message);
+}
+
+bool RecordHandle::ackHeartBeat(boost::shared_ptr<RecordTask> recordTask,const boost::shared_ptr<ProtoMsgData::AckHeartBeat> message)
+{
+    recordTask->resetHeartTime();
+    return true;
 }

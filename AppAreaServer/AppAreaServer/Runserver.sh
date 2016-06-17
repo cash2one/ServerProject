@@ -86,7 +86,7 @@ start()
         fi
     done
 
-    cond=$(ps -u $(basename $HOME) | grep server)
+    cond=$(ps -u $(basename $HOME) | grep Server)
     echo "$cond"
 }
 

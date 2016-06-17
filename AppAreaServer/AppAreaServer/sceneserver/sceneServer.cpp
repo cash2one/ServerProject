@@ -123,9 +123,13 @@ bool SceneServer::end()
     return true;
 }
 
-bool SceneServer::acceptConnect(const int socket)
+bool SceneServer::acceptConnect(const int socket,const int listenPort)
 {
     bool ret = false;
+    if(listenPort != m_port)
+    {
+        return ret;
+    }
     boost::shared_ptr<SceneTask> task(new SceneTask(socket));
     if(TaskManager::getInstance().addTask(task))
     {
