@@ -20,7 +20,7 @@ SceneTask::~SceneTask()
 
 MsgRet SceneTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<SceneTask> task = boost::dynamic_pointer_cast<SceneTask>(TaskManager::getInstance().getTask(m_id));
+    boost::shared_ptr<SceneTask> task = boost::dynamic_pointer_cast<SceneTask>(getPtr());
     return s_sceneMsgDispatcher.dispatch(task,message);
 }
 

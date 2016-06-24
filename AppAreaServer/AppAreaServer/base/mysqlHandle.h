@@ -34,6 +34,7 @@ class MysqlHandle : public DisCopy
         unsigned int getID();
         bool execSql(const char *sql,const unsigned int sqlLen);
         bool select(const char *sql,const unsigned int sqlLen,std::vector<std::map<std::string,Flyer::FlyerValue> >&contentVec);
+        void getRealString(const void *data,unsigned int size,std::ostringstream &oss);
 };
 
 #endif

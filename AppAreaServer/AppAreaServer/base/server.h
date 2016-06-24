@@ -5,6 +5,7 @@
 #include "flyerXmlParse.h"
 #include "mysqlPool.h"
 #include "clientManager.h"
+#include "superClient.h"
 
 class Server
 {
@@ -26,6 +27,7 @@ class Server
         std::string m_outIp;
         unsigned short m_outPort;
         int m_outFd;
+        boost::shared_ptr<SuperClient> m_superClient;
     private:
         int accept(std::map<int,int> &socketMap);
     public:

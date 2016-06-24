@@ -4,25 +4,27 @@
 #include "connect.h"
 #include "singleton.h"
 #include "messageDispatcher.h"
-#include "server.h"
+class Server;
 
 class SuperClient;
-typedef MessageDispatcher<SuperClient&> SuperClientMessageDispatcher;
-class SuperClient : public Connect,public Thread,public Singleton<SuperClient> 
+typedef MessageDispatcher<boost::shared_ptr<SuperClient> > SuperClientMessageDispatcher;
+class SuperClient : public Connect,public Thread 
 {
-    private:
-        friend class Singleton<SuperClient>;
-        SuperClient();
-        void close();
     public:
+        SuperClient(Server *server);
+        void close();
         ~SuperClient();
     private:
         int m_epfd;
         std::vector<struct epoll_event> m_eventVec;
+        Server *m_server;
     public:
         static SuperClientMessageDispatcher s_dispatcher;
-        static boost::shared_ptr<Server> s_server;
     public:
+        inline Server* getServer()
+        {
+            return m_server;
+        }
         bool init();
         virtual void run(); 
         virtual MsgRet dispatcher(boost::shared_ptr<google::protobuf::Message> message);

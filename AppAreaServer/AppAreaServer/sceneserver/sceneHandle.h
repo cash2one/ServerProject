@@ -13,7 +13,6 @@ class SceneHandle : public MessageHandle
     public:
         static bool reqVerifyServer(boost::shared_ptr<SceneTask> sceneTask,const boost::shared_ptr<ProtoMsgData::ReqVerifyServer> message);
         static bool reqLoginScene(boost::shared_ptr<SceneTask> sceneTask,const boost::shared_ptr<ProtoMsgData::ReqLoginScene> message);
-        static bool ackHeartBeat(boost::shared_ptr<SceneTask> sceneTask,const boost::shared_ptr<ProtoMsgData::AckHeartBeat> message);
 };
 
 #endif

@@ -70,7 +70,7 @@ MsgRet Client::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
     MsgRet ret = MR_False;
     do
     {
-        boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(getID());
+        boost::shared_ptr<Client> client = boost::dynamic_pointer_cast<Client>(getPtr());
         if(client)
         {
             ret = s_clientMsgDispatcher.dispatch(client,message);

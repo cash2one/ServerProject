@@ -36,13 +36,11 @@ bool SceneServer::init()
         {
             break;
         }
-        boost::shared_ptr<SceneServer> ptr(this);
-        SuperClient::getInstance().s_server = ptr;
-        if(!SuperClient::getInstance().init())
+        if(!m_superClient->init())
         {
             break;
         }
-        SuperClient::getInstance().start();
+        m_superClient->start();
         while(!getVerify())
         {
         }

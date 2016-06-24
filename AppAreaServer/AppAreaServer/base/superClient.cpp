@@ -1,12 +1,11 @@
 #include "superClient.h"
 #include "flyer.h"
 #include "system.pb.h"
-#include "server.h"
 #include "client.h"
+#include "server.h"
 
 SuperClientMessageDispatcher SuperClient::s_dispatcher("管理服务器客户端消息处理器");
-boost::shared_ptr<Server> SuperClient::s_server(NULL);
-SuperClient::SuperClient() : Connect(-1),Thread("管理服务器客户端"),m_epfd(-1)
+SuperClient::SuperClient(Server *server) : Connect(-1),Thread("管理服务器客户端"),m_epfd(-1),m_server(server)
 {
 }
 
@@ -14,6 +13,7 @@ SuperClient::~SuperClient()
 {
     TEMP_FAILURE_RETRY(::close(m_epfd));
     TEMP_FAILURE_RETRY(::close(m_socket));
+    m_server = NULL;
 }
 
 bool SuperClient::init()
@@ -43,7 +43,7 @@ bool SuperClient::init()
         }
         addEpoll(m_epfd,EPOLLIN | EPOLLOUT | EPOLLPRI | EPOLLERR);
         ProtoMsgData::ReqServerInfo reqServerInfo;
-        reqServerInfo.set_servertype(s_server->getType());
+        reqServerInfo.set_servertype(m_server->getType());
         if(!sendMsg(reqServerInfo))
         {
             break;
@@ -118,6 +118,7 @@ void SuperClient::run()
 
 MsgRet SuperClient::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    return s_dispatcher.dispatch(getInstance(),message);
+    boost::shared_ptr<SuperClient> superClient = boost::dynamic_pointer_cast<SuperClient>(getPtr());
+    return s_dispatcher.dispatch(superClient,message);
 }
 

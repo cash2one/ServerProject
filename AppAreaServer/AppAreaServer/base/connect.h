@@ -16,7 +16,9 @@ enum TaskStatus
     Task_Status_Recycle = 3, //回收
 };
 
-class Connect : private DisCopy
+class Connect;
+typedef MessageDispatcher<boost::shared_ptr<Connect> > ConnectMessageDispatcher;
+class Connect : private DisCopy , public boost::enable_shared_from_this<Connect>
 {
     protected:
         int m_socket;
@@ -32,6 +34,12 @@ class Connect : private DisCopy
         //消息队列
         MessageQueue m_messageQueue;
     public:
+        static ConnectMessageDispatcher s_connectMsgDispatcher;
+    private:
+        //基础消息处理
+        MsgRet baseDispatcher(boost::shared_ptr<google::protobuf::Message> message);
+    public:
+        boost::shared_ptr<Connect> getPtr();
         Connect(const int socket);
         virtual ~Connect()
         {
