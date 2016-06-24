@@ -19,7 +19,7 @@ GatewayTask::~GatewayTask()
 
 MsgRet GatewayTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<GatewayTask> task = boost::dynamic_pointer_cast<GatewayTask>(TaskManager::getInstance().getTask(m_id));
+    boost::shared_ptr<GatewayTask> task = boost::dynamic_pointer_cast<GatewayTask>(getPtr());
     return s_gatewayMsgDispatcher.dispatch(task,message);
 }
 
@@ -52,7 +52,7 @@ bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> 
             break;
         }
         unsigned int gatewayID = redisMem->getInt("logingate",message->phone().c_str());
-        if(m_id != gatewayID)
+        if(serverID != gatewayID)
         {
             code = ProtoMsgData::EC_Gateway_Wrong;
             break;

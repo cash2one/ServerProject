@@ -22,5 +22,5 @@ bool SceneHandle::init()
 
 bool SceneHandle::ackLoginScene(boost::shared_ptr<SceneClient> sceneClient,const boost::shared_ptr<ProtoMsgData::AckLoginScene> message)
 {
-    return false;
+    return sceneClient->ackUserMsg(message);
 }

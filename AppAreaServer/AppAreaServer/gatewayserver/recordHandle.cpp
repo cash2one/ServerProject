@@ -15,6 +15,7 @@ bool RecordHandle::init()
 #define MESSAGE_INIT(msg,call) \
     {\
         boost::shared_ptr<MsgCallBack<boost::shared_ptr<RecordClient>,ProtoMsgData::msg> > callBack(new MsgCallBack<boost::shared_ptr<RecordClient>,ProtoMsgData::msg>(&RecordHandle::call));\
+        RecordClient::s_recordClientMsgDispatcher.messageReg<ProtoMsgData::msg>(callBack);\
     }
     MESSAGE_INIT(AckCreateUser,ackCreateUser);
 #undef MESSAGE_INIT

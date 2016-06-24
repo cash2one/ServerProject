@@ -5,7 +5,7 @@
 #include "head.h"
 #include "serialize.pb.h"
 
-unsigned long RecordDataManager::s_charID = 10000; 
+unsigned long RecordDataManager::s_charID = 0; 
 RecordDataManager::RecordDataManager()
 {
 }
@@ -23,6 +23,7 @@ bool RecordDataManager::init()
         {
             break;
         }
+        ret = true;
     }while(false);
     return ret;
 }
@@ -39,7 +40,7 @@ bool RecordDataManager::loadUserData()
         }
         std::vector<std::map<std::string,Flyer::FlyerValue> > ipVec;
         char temp[100] = {0};
-        snprintf(temp,sizeof(temp),"select charid,binary from t_user");
+        snprintf(temp,sizeof(temp),"select * from t_user");
         if(!handle->select(temp,strlen(temp),ipVec))
         {
             break;
@@ -52,8 +53,7 @@ bool RecordDataManager::loadUserData()
                 continue;
             }
             unsigned long charID = tempMap["charid"];
-            s_charID = charID > s_charID ? charID : s_charID;
-            std::string binary = tempMap["ip"];
+            std::string binary = tempMap["binary"];
             char buffer[Flyer::msglen] = {0};
             memmove(buffer,binary.c_str(),binary.size());
             ProtoMsgData::UserBinary userBinary;
@@ -77,7 +77,7 @@ bool RecordDataManager::loadUserData()
             {
                 break;
             }
-            if(!redisMem->setInt("charid",userBinary.phone().c_str(),charID));
+            if(!redisMem->setInt("charid",userBinary.phone().c_str(),charID))
             {
                 break;
             }
@@ -86,17 +86,34 @@ bool RecordDataManager::loadUserData()
             {
                 break;
             }
-            if(!redisMem->setString("phone",charID,userBinary.phone().c_str()));
+            if(!redisMem->setString("phone",charID,userBinary.phone().c_str()))
             {
                 break;
             }
-            if(!redisMem->setBin("userbinary",charID,buffer,binary.size()));
+            if(!redisMem->setBin("userbinary",charID,buffer,binary.size()))
             {
                 break;
             }
-            ret = true;
         }
+        ipVec.clear();
+        bzero(temp,sizeof(temp));
+        snprintf(temp,sizeof(temp),"select max(charid) as charid from t_user");
+        if(!handle->select(temp,strlen(temp),ipVec))
+        {
+            break;
+        }
+        for(unsigned int cnt = 0;cnt < ipVec.size();++cnt)
+        {
+            std::map<std::string,Flyer::FlyerValue> &tempMap = ipVec[cnt];
+            if(tempMap.find("charid") != tempMap.end())
+            {
+                s_charID = tempMap["charid"];
+            }
+            break;
+        }
+        ret = true;
     }while(false);
+    Info(Flyer::logger,"[加载角色信息完毕] (" << s_charID << "," << ret << ")")
     return ret;
 }
 
@@ -112,14 +129,16 @@ bool RecordDataManager::createUser(const std::string &phone,unsigned long &charI
         }
         ProtoMsgData::UserBinary binary;
         binary.set_phone(phone);
-        binary.set_charid(s_charID);
-        char buffer[Flyer::msglen] = {0};
+        binary.set_charid(s_charID + 1);
+        binary.set_ontime(0);
+        binary.set_offtime(0);
+        char buffer[Flyer::msglen];
         binary.SerializeToArray(buffer,sizeof(buffer));
-        std::string userBinary(buffer,binary.ByteSize());
-
-        char temp[100] = {0};
-        snprintf(temp,sizeof(temp),"insert into t_user values(%lu,%s,%s)",binary.charid(),binary.phone().c_str(),userBinary.c_str());
-        if(!handle->execSql(temp,strlen(temp)))
+        std::ostringstream oss;
+        oss << "insert into t_user values(" << binary.charid() << "," << binary.phone() << ",";
+        handle->getRealString(buffer,binary.ByteSize(),oss);
+        oss << ")";
+        if(!handle->execSql(oss.str().c_str(),oss.str().size()))
         {
             break;
         }
@@ -129,7 +148,7 @@ bool RecordDataManager::createUser(const std::string &phone,unsigned long &charI
         {
             break;
         }
-        if(!redisMem->setInt("charid",binary.phone().c_str(),binary.charid()));
+        if(!redisMem->setInt("charid",binary.phone().c_str(),binary.charid()))
         {
             break;
         }
@@ -138,11 +157,11 @@ bool RecordDataManager::createUser(const std::string &phone,unsigned long &charI
         {
             break;
         }
-        if(!redisMem->setString("phone",binary.charid(),binary.phone().c_str()));
+        if(!redisMem->setString("phone",binary.charid(),binary.phone().c_str()))
         {
             break;
         }
-        if(!redisMem->setBin("userbinary",binary.charid(),buffer,binary.ByteSize()));
+        if(!redisMem->setBin("userbinary",binary.charid(),buffer,binary.ByteSize()))
         {
             break;
         }

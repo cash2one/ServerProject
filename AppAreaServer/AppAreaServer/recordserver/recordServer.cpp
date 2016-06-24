@@ -8,6 +8,7 @@
 #include "taskManager.h"
 #include "recycleThread.h"
 #include "verifyThread.h"
+#include "recordDataManager.h"
 
 RecordServer::RecordServer() : Server("档案服务器",ProtoMsgData::ST_Record)
 {
@@ -31,13 +32,15 @@ bool RecordServer::init()
         {
             break;
         }
-        boost::shared_ptr<RecordServer> ptr(this);
-        SuperClient::getInstance().s_server = ptr;
-        if(!SuperClient::getInstance().init())
+        if(!RecordDataManager::getInstance().init())
         {
             break;
         }
-        SuperClient::getInstance().start();
+        if(!m_superClient->init())
+        {
+            break;
+        }
+        m_superClient->start();
         while(!getVerify())
         {
         }
@@ -86,9 +89,6 @@ void RecordServer::startServerThread()
 
 void RecordServer::endServerThread()
 {
-    SuperClient::getInstance().final();
-    SuperClient::getInstance().end();
-
     RecordTimeTick::getInstance().final();
     RecordTimeTick::getInstance().end();
 }

@@ -18,8 +18,7 @@ MsgRet RecordClient::dispatcher(boost::shared_ptr<google::protobuf::Message> mes
         ret = Client::dispatcher(message);
         if(ret == MR_No_Register)
         {
-            boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(getID());
-            boost::shared_ptr<RecordClient> recordClient = boost::dynamic_pointer_cast<RecordClient>(client);
+            boost::shared_ptr<RecordClient> recordClient = boost::dynamic_pointer_cast<RecordClient>(getPtr());
             ret = s_recordClientMsgDispatcher.dispatch(recordClient,message);
         }
     }while(false);

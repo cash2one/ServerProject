@@ -136,7 +136,7 @@ void SuperServer::verifyOtherNotify(const ProtoMsgData::ServerType &serverType)
     }
 }
 
-class Base
+class Base : public boost::enable_shared_from_this<Base>
 {
     public:
         virtual void doSameThing()
@@ -145,6 +145,11 @@ class Base
         virtual ~Base()
         {
             std::cout << "~Base" << endl;
+        }
+        boost::shared_ptr<Base> getSharedPtr()
+        {
+            boost::shared_ptr<Base> ptr = shared_from_this();
+            return ptr;
         }
 };
 
@@ -159,17 +164,28 @@ class Father : public Base
 
 void del(Base *base)
 {
-    boost::shared_ptr<Base> now(base);
+    boost::shared_ptr<Base> now = base->getSharedPtr();
+    now->doSameThing();
+}
+
+void delFather(Base *base)
+{
+    boost::shared_ptr<Father> now = boost::dynamic_pointer_cast<Father>(base->getSharedPtr());
     now->doSameThing();
 }
 
 
+
 int main()
 {
-
 #if 0
     Base *base = new Base();
+    boost::shared_ptr<Base> here(base);
     del(base);
+    Father *father = new Father();
+    boost::shared_ptr<Base> fat(father);
+    delFather(father);
+
     std::cout << "now here del" << endl;
     std::vector<boost::shared_ptr<Base> > testVec;
     testVec.push_back(boost::shared_ptr<Base>(new Base()));

@@ -14,11 +14,17 @@ void SuperTimeTick::run()
     while(!isFinal())
     {
         s_time.now();
-        if(m_hourClock(s_time))
+        if(m_secClock(s_time))
         {
-            char fileName[100] = {0};
-            snprintf(fileName,sizeof(fileName),"log/scene-%02u.log",SuperServer::getInstance().getServerID());
-            Flyer::changeLogger(fileName,s_time.sec());
+            if(m_secClock(s_time))
+            {
+                if(s_time.sec() % (60 * 60) == 0)
+                {
+                    char fileName[100] = {0};
+                    snprintf(fileName,sizeof(fileName),"log/super.log");
+                    Flyer::changeLogger(fileName,s_time.sec());
+                }
+            }
         }
         if(m_minClock(s_time))
         {

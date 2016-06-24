@@ -17,7 +17,6 @@ bool GatewayHandle::init()
     GatewayTask::s_gatewayMsgDispatcher.messageReg<ProtoMsgData::msg>(callBack);\
 }
     MESSAGE_INIT(ReqLoginGateway,reqLoginGateway);
-    MESSAGE_INIT(AckHeartBeat,ackHeartBeat);
 #undef MESSAGE_INIT
     return true;
 }
@@ -25,10 +24,4 @@ bool GatewayHandle::init()
 bool GatewayHandle::reqLoginGateway(boost::shared_ptr<GatewayTask> gatewayTask,const boost::shared_ptr<ProtoMsgData::ReqLoginGateway> message)
 {
     return gatewayTask->loginGateway(message);
-}
-
-bool GatewayHandle::ackHeartBeat(boost::shared_ptr<GatewayTask> gatewayTask,const boost::shared_ptr<ProtoMsgData::AckHeartBeat> message)
-{
-    gatewayTask->resetHeartTime();
-    return true;
 }

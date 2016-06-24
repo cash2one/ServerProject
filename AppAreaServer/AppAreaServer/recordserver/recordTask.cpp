@@ -17,7 +17,7 @@ RecordTask::~RecordTask()
 
 MsgRet RecordTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<RecordTask> task = boost::dynamic_pointer_cast<RecordTask>(TaskManager::getInstance().getTask(m_id));
+    boost::shared_ptr<RecordTask> task = boost::dynamic_pointer_cast<RecordTask>(getPtr());
     return s_recordMsgDispatcher.dispatch(task,message);
 }
 

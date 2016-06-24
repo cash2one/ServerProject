@@ -10,6 +10,11 @@
 #include "sceneHandle.h"
 #include "redisMemManager.h"
 #include "system.pb.h"
+#include "taskManager.h"
+#include "verifyThread.h"
+#include "recycleThread.h"
+#include "gatewayTask.h"
+#include "gatewayHandle.h"
 
 GatewayServer::GatewayServer() : Server("网关服务器",ProtoMsgData::ST_Gateway)
 {
@@ -30,17 +35,16 @@ bool GatewayServer::init()
         }
         MessageHandleManager::getInstance().addHandle(boost::shared_ptr<RecordHandle>(new RecordHandle()));
         MessageHandleManager::getInstance().addHandle(boost::shared_ptr<SceneHandle>(new SceneHandle()));
+        MessageHandleManager::getInstance().addHandle(boost::shared_ptr<GatewayHandle>(new GatewayHandle()));
         if(!MessageHandleManager::getInstance().init())
         {
             break;
         }
-        boost::shared_ptr<GatewayServer> ptr(this);
-        SuperClient::getInstance().s_server = ptr;
-        if(!SuperClient::getInstance().init())
+        if(!m_superClient->init())
         {
             break;
         }
-        SuperClient::getInstance().start();
+        m_superClient->start();
         while(!getVerify())
         {
         }
@@ -127,6 +131,23 @@ void GatewayServer::endServerThread()
     GatewayTimeTick::getInstance().end();
 }
 
+bool GatewayServer::acceptConnect(const int socket,const int listenFd)
+{
+    bool ret = false;
+    boost::shared_ptr<GatewayTask> task(new GatewayTask(socket));
+    if(TaskManager::getInstance().addTask(task))
+    {
+        task->nextStatus();
+        ret = VerifyThread::getInstance().add(task);
+    }
+    else
+    {
+        TaskManager::getInstance().eraseTask(task->getID());
+        task->setStatus(Task_Status_Recycle);
+        RecycleThread::getInstance().add(task);
+    }
+    return ret;
+}
 int main()
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;

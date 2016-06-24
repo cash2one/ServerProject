@@ -18,7 +18,6 @@ bool SuperHandle::init()
 }
     MESSAGE_INIT(ReqServerInfo,reqServerInfo);
     MESSAGE_INIT(AckRespServerInfo,ackRespServerInfo);
-    MESSAGE_INIT(AckHeartBeat,ackHeartBeat);
 #undef MESSAGE_INIT
     return true;
 }
@@ -32,22 +31,7 @@ bool SuperHandle::ackRespServerInfo(boost::shared_ptr<SuperTask> superTask,const
 {
     bool ret = false;
     boost::shared_ptr<Connect> connect = TaskManager::getInstance().getServerTask(message->id());
-    if(connect)
-    {
-        boost::shared_ptr<SuperTask> task = boost::dynamic_pointer_cast<SuperTask>(connect);
-        if(task)
-        {
-            ret = task->accepteResp(superTask->getServerID());
-        }
-    }
+    boost::shared_ptr<SuperTask> task = boost::dynamic_pointer_cast<SuperTask>(connect);
+    ret = task->accepteResp(superTask->getServerID());
     return ret;
 }
-
-bool SuperHandle::ackHeartBeat(boost::shared_ptr<SuperTask> superTask,const boost::shared_ptr<ProtoMsgData::AckHeartBeat> message)
-{
-    superTask->resetHeartTime();
-    return true;
-}
-
-
-

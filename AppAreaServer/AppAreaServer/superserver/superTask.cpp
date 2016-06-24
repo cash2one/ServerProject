@@ -15,7 +15,7 @@ SuperTask::~SuperTask()
 
 MsgRet SuperTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<SuperTask> task = boost::dynamic_pointer_cast<SuperTask>(TaskManager::getInstance().getTask(m_id));
+    boost::shared_ptr<SuperTask> task = boost::dynamic_pointer_cast<SuperTask>(getPtr());
     return s_superMsgDispatcher.dispatch(task,message);
 }
 

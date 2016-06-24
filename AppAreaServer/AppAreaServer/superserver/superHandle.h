@@ -12,10 +12,7 @@ class SuperHandle : public MessageHandle
         virtual bool init();
     public:
         static bool reqServerInfo(boost::shared_ptr<SuperTask> superTask,const boost::shared_ptr<ProtoMsgData::ReqServerInfo> message);
-        
         static bool ackRespServerInfo(boost::shared_ptr<SuperTask> superTask,const boost::shared_ptr<ProtoMsgData::AckRespServerInfo> message);
-
-        static bool ackHeartBeat(boost::shared_ptr<SuperTask> superTask,const boost::shared_ptr<ProtoMsgData::AckHeartBeat> message);
 
 };
 

@@ -20,8 +20,7 @@ MsgRet SceneClient::dispatcher(boost::shared_ptr<google::protobuf::Message> mess
         ret = Client::dispatcher(message);
         if(ret == MR_No_Register)
         {
-            boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(getID());
-            boost::shared_ptr<SceneClient> sceneClient = boost::dynamic_pointer_cast<SceneClient>(client);
+            boost::shared_ptr<SceneClient> sceneClient = boost::dynamic_pointer_cast<SceneClient>(getPtr());
             ret = s_sceneClientMsgDispatcher.dispatch(sceneClient,message);
         }
     }while(false);

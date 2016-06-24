@@ -18,8 +18,7 @@ MsgRet LoginClient::dispatcher(boost::shared_ptr<google::protobuf::Message> mess
         ret = Client::dispatcher(message);
         if(ret == MR_No_Register)
         {
-            boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(getID());
-            boost::shared_ptr<LoginClient> loginClient = boost::dynamic_pointer_cast<LoginClient>(client);
+            boost::shared_ptr<LoginClient> loginClient = boost::dynamic_pointer_cast<LoginClient>(getPtr());
             ret = s_loginClientMsgDispatcher.dispatch(loginClient,message);
         }
     }while(false);
