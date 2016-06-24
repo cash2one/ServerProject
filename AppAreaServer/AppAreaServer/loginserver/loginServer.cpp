@@ -115,6 +115,7 @@ bool LoginServer::initLoginIp()
             {
                 continue;
             }
+            m_id = tempMap["id"];
             std::string ip = tempMap["ip"];
             m_ip = ip;
             m_port = tempMap["port"];

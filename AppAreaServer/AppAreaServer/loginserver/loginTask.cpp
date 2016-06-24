@@ -16,7 +16,7 @@ LoginTask::~LoginTask()
 
 MsgRet LoginTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<LoginTask> task = boost::dynamic_pointer_cast<LoginTask>(TaskManager::getInstance().getTask(m_id));
+    boost::shared_ptr<LoginTask> task = boost::dynamic_pointer_cast<LoginTask>(getPtr());
     return s_loginMsgDispatcher.dispatch(task,message);
 }
 
@@ -107,7 +107,7 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
             unsigned int len = redisMem->getBin("gateway",*iter,temp);
             ProtoMsgData::GatewayInfo gateInfo;
             gateInfo.ParseFromArray(temp,len);
-            if(gateInfo.status() == ProtoMsgData::GS_Normal && gateInfo.person() <= lessNum)
+            if(gateInfo.status() == ProtoMsgData::GS_Normal && (!lessNum || gateInfo.person() <= lessNum))
             {
                 lessID = *iter;
                 lessNum = gateInfo.person();

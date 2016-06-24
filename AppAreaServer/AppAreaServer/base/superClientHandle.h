@@ -11,11 +11,8 @@ class SuperClientHandle : public MessageHandle
         ~SuperClientHandle();
         virtual bool init();
     public:
-        static bool ackUpdateServerInfo(SuperClient &superClient,const boost::shared_ptr<ProtoMsgData::AckUpdateServerInfo> message);
-    
-        static bool ackServerInfo(SuperClient &superClient,const boost::shared_ptr<ProtoMsgData::AckNotifyMe> message);
-
-        static bool reqHeartBeat(SuperClient &superClient,const boost::shared_ptr<ProtoMsgData::ReqHeartBeat> message);
+        static bool ackUpdateServerInfo(boost::shared_ptr<SuperClient> superClient,const boost::shared_ptr<ProtoMsgData::AckUpdateServerInfo> message);
+        static bool ackServerInfo(boost::shared_ptr<SuperClient> superClient,const boost::shared_ptr<ProtoMsgData::AckNotifyMe> message);
 
 };
 

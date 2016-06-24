@@ -12,8 +12,9 @@
 #include "mainThread.h"
 #include "verifyThread.h"
 #include "redisMemManager.h"
+#include "connectHandle.h"
 
-Server::Server(const std::string &name,const ProtoMsgData::ServerType &type) : m_name(name),m_type(type),m_id(0),m_port(0),m_fd(-1),m_epfd(-1),m_verify(false),m_outIp(),m_outPort(0),m_outFd(-1)
+Server::Server(const std::string &name,const ProtoMsgData::ServerType &type) : m_name(name),m_type(type),m_id(0),m_port(0),m_fd(-1),m_epfd(-1),m_verify(false),m_outIp(),m_outPort(0),m_outFd(-1),m_superClient(NULL)
 {
     m_epfd = epoll_create(10);
 }
@@ -44,7 +45,6 @@ bool Server::init()
         {
             break;
         }
-        CmdFunManager::getInstance().logCmdMap();
         if(!MysqlPool::getInstance().addUrl(Flyer::globalConfMap["mysql"]))
         {
             break;
@@ -52,10 +52,16 @@ bool Server::init()
         if(m_type != ProtoMsgData::ST_Login && m_type != ProtoMsgData::ST_Super)
         {
             MessageHandleManager::getInstance().addHandle(boost::shared_ptr<SuperClientHandle>(new SuperClientHandle()));
+            m_superClient = boost::shared_ptr<SuperClient>(new SuperClient(this));
         }
+        MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ConnectHandle>(new ConnectHandle()));
         if(m_type != ProtoMsgData::ST_Login && m_type != ProtoMsgData::ST_Record)
         {
             MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ClientHandle>(new ClientHandle()));
+        }
+        if(m_type == ProtoMsgData::ST_Login)
+        {
+            RedisMemManager::getInstance().clearMemory();
         }
         if(!loadConf())
         {
@@ -291,6 +297,12 @@ void Server::startThread()
 void Server::endThread()
 {
     this->endServerThread();
+    if(m_superClient)
+    {
+        m_superClient->final();
+        m_superClient->end();
+    }
+
     VerifyThread::getInstance().final();
     VerifyThread::getInstance().end();
 

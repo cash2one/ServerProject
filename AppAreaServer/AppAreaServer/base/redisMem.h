@@ -36,6 +36,7 @@ class RedisMem
         bool isReplyOK();
         Flyer::FlyerValue getVal(const RedisDataType &redisDataType);
     public:
+        void exeCmd(const char *cmd);
         bool setInt(const char* table,const unsigned long key,const unsigned long value);
         Flyer::FlyerValue getInt(const char* table,const unsigned long key);
         bool setInt(const char* table,const char *key,const unsigned long value);
@@ -51,11 +52,11 @@ class RedisMem
 
 
         bool setSet(const char* table,const unsigned long key,const char *set,const unsigned long value);
-        Flyer::FlyerValue getSet(const char* table,const unsigned long key,const char *set,std::set<std::string> &retSet,const unsigned int cnt);
+        Flyer::FlyerValue getSet(const char* table,const unsigned long key,const char *set,std::set<std::string> &retSet,const unsigned int cnt = 10000);
         bool setBin(const char* table,const unsigned long key,const char *col,const char *val,const unsigned int len);
         unsigned int getBin(const char* table,const unsigned long key,const char *col,char *val);
         bool setSet(const char* table,const char *set,const unsigned long value);
-        Flyer::FlyerValue getSet(const char* table,const char *set,std::set<std::string> &retSet,const unsigned int cnt);
+        Flyer::FlyerValue getSet(const char* table,const char *set,std::set<std::string> &retSet,const unsigned int cnt = 10000);
         Flyer::FlyerValue getSet(const char* table,const char *set,std::set<std::string> &retSet);
         bool setBin(const char* table,const unsigned long key,const char *val,const unsigned int len);
         unsigned int getBin(const char* table,const unsigned long key,char *val);

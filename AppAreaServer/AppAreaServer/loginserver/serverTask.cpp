@@ -16,7 +16,7 @@ ServerTask::~ServerTask()
 
 MsgRet ServerTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<ServerTask> task = boost::dynamic_pointer_cast<ServerTask>(TaskManager::getInstance().getTask(m_id));
+    boost::shared_ptr<ServerTask> task = boost::dynamic_pointer_cast<ServerTask>(getPtr());
     return s_serverMsgDispatcher.dispatch(task,message);
 }
 

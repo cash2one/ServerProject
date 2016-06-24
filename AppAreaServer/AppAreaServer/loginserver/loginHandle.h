@@ -12,7 +12,6 @@ class LoginHandle : public MessageHandle
         virtual bool init();
     public:
         static bool reqRegister(boost::shared_ptr<LoginTask> loginTask,const boost::shared_ptr<ProtoMsgData::ReqRegister> message);
-
         static bool reqGateway(boost::shared_ptr<LoginTask> loginTask,const boost::shared_ptr<ProtoMsgData::ReqGateway> message);
 
 };

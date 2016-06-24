@@ -6,8 +6,14 @@
 #include "system.pb.h"
 
 unsigned long Connect::s_tempid = 0;
+ConnectMessageDispatcher Connect::s_connectMsgDispatcher("连接消息处理器");
 Connect::Connect(const int socket) : m_socket(socket),m_id(++s_tempid),m_status(Task_Status_Close),m_lifeTime(),m_serverID(0),m_serverType(ProtoMsgData::ST_Client),m_heartTime()
 {
+}
+
+boost::shared_ptr<Connect> Connect::getPtr()
+{
+    return shared_from_this();
 }
 
 void Connect::addEpoll(const int epfd,const unsigned long events)
@@ -62,7 +68,11 @@ bool Connect::accpetMsg()
             {
                 continue;
             }
-            MsgRet flg = this->dispatcher(message);
+            MsgRet flg = baseDispatcher(message);
+            if(flg == MR_No_Register)
+            {
+                flg = this->dispatcher(message);
+            }
             Debug(Flyer::logger,"接受且处理消息(" << m_id << "," << message->GetTypeName() << "," << flg << ")");
         }
         ret = true;
@@ -219,4 +229,14 @@ bool Connect::sendHeartMsg()
     sendMsg(reqMsg);
     resetHeartTime();
     return true;
+}
+
+MsgRet Connect::baseDispatcher(boost::shared_ptr<google::protobuf::Message> message)
+{
+    MsgRet ret = MR_False;
+    do
+    {
+        ret = s_connectMsgDispatcher.dispatch(getPtr(),message);
+    }while(false);
+    return ret;
 }

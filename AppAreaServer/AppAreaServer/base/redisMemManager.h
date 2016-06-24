@@ -17,6 +17,7 @@ class RedisMemManager : public Singleton<RedisMemManager>
     public:
         bool init();
         boost::shared_ptr<RedisMem> getRedis(const unsigned short id = 0);
+        void clearMemory();
 };
 
 #endif

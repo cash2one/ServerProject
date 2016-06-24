@@ -115,13 +115,20 @@ bool MysqlHandle::execSql(const char *sql,const unsigned int sqlLen)
        }
        if(mysql_real_query(m_mysql,sql,sqlLen))
        {
-           Error(Flyer::logger,"[数据库连接] 执行失败(" << sql << "," << sqlLen << ")");
+           Error(Flyer::logger,"[数据库连接] 执行失败(" << sql << "," << sqlLen << "," << mysql_error(m_mysql) << ")");
            break;
        }
        ret = true;
    }while(false);
 
    return ret;
+}
+
+void MysqlHandle::getRealString(const void *data,unsigned int size,std::ostringstream &oss)
+{
+    char temp[size * 2 + 1];
+    mysql_real_escape_string(m_mysql,temp,(char*)data,size);
+    oss << "\'" << temp << "\'";
 }
 
 bool MysqlHandle::select(const char *sql,const unsigned int sqlLen,std::vector<std::map<std::string,Flyer::FlyerValue> >&contentVec)
@@ -135,8 +142,13 @@ bool MysqlHandle::select(const char *sql,const unsigned int sqlLen,std::vector<s
             break;
         }
         result = mysql_store_result(m_mysql);
-        if(!result || !mysql_num_rows(result))
+        if(!result)
         {
+            break;
+        }
+        if(!mysql_num_rows(result))
+        {
+            ret = true;
             break;
         }
         MYSQL_FIELD *mysqlFile = mysql_fetch_fields(result);

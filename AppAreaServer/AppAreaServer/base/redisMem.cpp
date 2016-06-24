@@ -141,7 +141,8 @@ bool RedisMem::setInt(const char* table,const char *key,const unsigned long valu
         }
         m_reply = (redisReply*)redisCommand(m_redis,"SET %s %lu",table,value);
     }while(false);
-    return excelRetCheck();
+    bool ret = excelRetCheck();
+    return ret;
 }
 
 Flyer::FlyerValue RedisMem::getInt(const char* table,const char *key)
@@ -351,10 +352,10 @@ Flyer::FlyerValue RedisMem::getSet(const char* table,const char *set,std::set<un
         }
         if(set)
         {
-            m_reply = (redisReply*)redisCommand(m_redis,"SRANDMEMBER %s:%s %u",table,set,cnt);
+            m_reply = (redisReply*)redisCommand(m_redis,"SMEMBERS %s:%s %u",table,set,cnt);
             break;
         }
-        m_reply = (redisReply*)redisCommand(m_redis,"SRANDMEMBER %s %u",table,cnt);
+        m_reply = (redisReply*)redisCommand(m_redis,"SMEMBERS %s %u",table,cnt);
     }while(false);
     if(isReplyOK())
     {
@@ -381,10 +382,10 @@ Flyer::FlyerValue RedisMem::getSet(const char* table,const char *set,std::set<un
         }
         if(set)
         {
-            m_reply = (redisReply*)redisCommand(m_redis,"SRANDMEMBER %s:%s ",table,set);
+            m_reply = (redisReply*)redisCommand(m_redis,"SMEMBERS %s:%s ",table,set);
             break;
         }
-        m_reply = (redisReply*)redisCommand(m_redis,"SRANDMEMBER %s ",table);
+        m_reply = (redisReply*)redisCommand(m_redis,"SMEMBERS %s ",table);
     }while(false);
     if(isReplyOK())
     {
@@ -664,4 +665,14 @@ Flyer::FlyerValue RedisMem::getVal(const RedisDataType &redisDataType)
     return ret;
 }
 
-
+void RedisMem::exeCmd(const char *cmd)
+{
+    if(m_reply)
+    {
+        freeReplyObject(m_reply);
+        m_reply = NULL;
+    }
+    m_reply = (redisReply*)redisCommand(m_redis,cmd);
+    freeReplyObject(m_reply);
+    m_reply = NULL;
+}

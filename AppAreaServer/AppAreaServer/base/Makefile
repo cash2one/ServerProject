@@ -35,7 +35,8 @@ src = thread.cpp\
 	  excelManager.cpp\
 	  clientHandle.cpp\
 	  redisMem.cpp\
-	  redisMemManager.cpp
+	  redisMemManager.cpp\
+	  connectHandle.cpp
 		
 
 object = $(patsubst %.cpp,%.o,$(src))

@@ -8,7 +8,7 @@ namespace Flyer
     std::map<std::string,std::string> globalConfMap;
     void init()
     {
-        msglen = 10240;
+        msglen = 1024;
         seed = 0;
         globalConfMap.clear();
     }
@@ -37,8 +37,15 @@ namespace Flyer
     void changeLogger(const char *file,const unsigned long now)
     {
         char fileName[100] = {0};
-        tm *localTime = localtime((time_t*)&now);
-        snprintf(fileName,sizeof(fileName),"%s-%02d-%02d-%02d-%02d-%02d.log",file,localTime->tm_year + 1900,localTime->tm_mon + 1,localTime->tm_mday,localTime->tm_hour,localTime->tm_min);
+        if(now)
+        {
+            tm *localTime = localtime((time_t*)&now);
+            snprintf(fileName,sizeof(fileName),"%s-%02d-%02d-%02d-%02d-%02d.log",file,localTime->tm_year + 1900,localTime->tm_mon + 1,localTime->tm_mday,localTime->tm_hour,localTime->tm_min);
+        }
+        else
+        {
+            snprintf(fileName,sizeof(fileName),"%s",file);
+        }
         LOG4CXX_INFO(Flyer::logger,fileName);
         Flyer::setLogger(fileName);
     }

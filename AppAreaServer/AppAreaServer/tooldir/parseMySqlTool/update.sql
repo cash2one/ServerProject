@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS t_register
 #flyer   201606-07-21 注册表
 CREATE TABLE IF NOT EXISTS t_user
 (
-    `charid` BIGINT(20) UNSIGNED NOT NULL,
+    `charid` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
     `phone` varchar(20) NOT NULL,
     `binary` blob, 
     PRIMARY KEY(charid)

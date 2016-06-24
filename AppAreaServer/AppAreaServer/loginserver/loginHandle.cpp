@@ -31,4 +31,3 @@ bool LoginHandle::reqGateway(boost::shared_ptr<LoginTask> loginTask,const boost:
 {
     return loginTask->getGatewayInfo(message);
 }
-

@@ -42,7 +42,7 @@ bool RedisMemManager::init()
             }
             m_redisMap.insert(std::pair<unsigned short,boost::shared_ptr<RedisMem> >(redisMem->getID(),redisMem));
         }
-        ret = true;
+        ret = m_redisMap.empty() ? false : true;
     }while(false);
     char temp[100] = {0};
     snprintf(temp,sizeof(temp),"[redis管理器] 加载配置%s",ret ? "成功" : "失败");
@@ -62,4 +62,15 @@ boost::shared_ptr<RedisMem> RedisMemManager::getRedis(const unsigned short id)
     }
     pthread_mutex_unlock(&m_mutex);
     return redisMem;
+}
+
+void RedisMemManager::clearMemory()
+{
+    pthread_mutex_lock(&m_mutex);
+    for(auto iter = m_redisMap.begin();iter != m_redisMap.end();++iter)
+    {
+        boost::shared_ptr<RedisMem> redisMem = iter->second;
+        redisMem->exeCmd("FLUSHALL");
+    }
+    pthread_mutex_unlock(&m_mutex);
 }
