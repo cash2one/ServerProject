@@ -13,6 +13,31 @@ struct MessageData
         key = 0;
         size = 0;
     }
+
+    bool initFromData(const std::string &data)
+    {
+        bool ret = false;
+        do
+        {
+            if(data.empty())
+            {
+                break;
+            }
+            const char *ptr = data.c_str();
+            unsigned int len = *(unsigned int*)(ptr);
+            if(len != data.size())
+            {
+                break;
+            }
+            unsigned int offset = sizeof(unsigned int);
+            key = *(unsigned int*)(ptr + offset);
+            offset += sizeof(unsigned int);
+            size = len - offset;
+            bcopy((void*)(ptr + offset),(void*)(&data[0]),size);
+            ret = true;
+        }while(false);
+        return ret;
+    }
 };
 
 class MessageQueue

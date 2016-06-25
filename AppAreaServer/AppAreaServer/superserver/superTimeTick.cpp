@@ -21,7 +21,7 @@ void SuperTimeTick::run()
                 if(s_time.sec() % (60 * 60) == 0)
                 {
                     char fileName[100] = {0};
-                    snprintf(fileName,sizeof(fileName),"log/super.log");
+                    snprintf(fileName,sizeof(fileName),"log/super-%02u.log",SuperServer::getInstance().getServerID());
                     Flyer::changeLogger(fileName,s_time.sec());
                 }
             }

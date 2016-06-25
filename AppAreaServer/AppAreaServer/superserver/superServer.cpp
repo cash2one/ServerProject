@@ -40,6 +40,7 @@ bool SuperServer::init()
         }
         m_ip = Flyer::globalConfMap["superip"];
         m_port = atol(Flyer::globalConfMap["superport"].c_str());
+        m_id = atol(Flyer::globalConfMap["superid"].c_str());
         if(!listenPort())
         {
             break;

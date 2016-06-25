@@ -169,7 +169,7 @@ bool RecordDataManager::createUser(const std::string &phone,unsigned long &charI
         ret = true;
     }while(false);
     char temp[100] = {0};
-    snprintf(temp,sizeof(temp),"[创建新角色] %s(%s)",ret ? "成功" : "失败", phone.c_str());
+    snprintf(temp,sizeof(temp),"[新建角色] %s(%s)",ret ? "成功" : "失败", phone.c_str());
     Info(Flyer::logger,temp);
     return ret;
 }

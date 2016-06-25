@@ -68,12 +68,20 @@ bool Connect::accpetMsg()
             {
                 continue;
             }
+            std::string protoName = message->GetTypeName();
+            if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
+            {
+                Debug(Flyer::logger,"接受消息(" << m_id << "," << message->GetTypeName() << ")");
+            }
             MsgRet flg = baseDispatcher(message);
             if(flg == MR_No_Register)
             {
                 flg = this->dispatcher(message);
             }
-            Debug(Flyer::logger,"接受且处理消息(" << m_id << "," << message->GetTypeName() << "," << flg << ")");
+            if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
+            {
+                Debug(Flyer::logger,"处理消息(" << m_id << "," << message->GetTypeName() << "," << flg << ")");
+            }
         }
         ret = true;
     }while(false);
@@ -144,7 +152,11 @@ bool Connect::sendMsg(const google::protobuf::Message &message)
     std::string ret;
     encodeMessage(&message,ret);
     bool flg = send(m_socket,ret.c_str(),ret.size(),0);
-    Debug(Flyer::logger,"发送消息(" << m_id << "," << message.GetTypeName() << "," << flg << ")");
+    std::string protoName = message.GetTypeName();
+    if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
+    {
+        Debug(Flyer::logger,"发送消息(" << m_id << "," << message.GetTypeName() << "," << flg << ")");
+    }
     return flg;
 }
 

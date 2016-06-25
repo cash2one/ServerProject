@@ -7,9 +7,10 @@
 #include "clientManager.h"
 #include "recycleThread.h"
 #include "gatewayServer.h"
+#include "sceneClient.h"
 
 GatewayMessageDispatcher GatewayTask::s_gatewayMsgDispatcher("网关服务器消息处理器");
-GatewayTask::GatewayTask(const int fd) : Connect(fd),m_charID(0),m_isLogin(false)
+GatewayTask::GatewayTask(const int fd) : Connect(fd),m_charID(0),m_isLogin(false),m_sceneID(0)
 {
 }
 
@@ -20,7 +21,23 @@ GatewayTask::~GatewayTask()
 MsgRet GatewayTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
     boost::shared_ptr<GatewayTask> task = boost::dynamic_pointer_cast<GatewayTask>(getPtr());
-    return s_gatewayMsgDispatcher.dispatch(task,message);
+    MsgRet ret = s_gatewayMsgDispatcher.dispatch(task,message);
+    if(ret == MR_No_Register)
+    {
+        bool flg = false;
+        boost::shared_ptr<Client> client = ClientManager::getInstance().getServerClient(task->getSceneID());
+        boost::shared_ptr<SceneClient> sceneClient = boost::dynamic_pointer_cast<SceneClient>(client);
+        if(sceneClient)
+        {
+            google::protobuf::Message *msg = message.get();
+            if(msg)
+            {
+                flg = sceneClient->sendMsg(*msg);
+            }
+        }
+        ret = flg ? MR_True : MR_False; 
+    }
+    return ret;
 }
 
 bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> message)
@@ -73,7 +90,11 @@ bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> 
             {
                 break;
             }
+            char temp[100] = {0};
+            snprintf(temp,sizeof(temp),"[登录网关(请求新建角色)] (%s,%lu)",message->phone().c_str(),getID());
+            Debug(Flyer::logger,temp);
             client->sendMsg(reqMsg);
+
         }
         else
         {
@@ -126,6 +147,9 @@ bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> 
     {
         nextStatus();
     }
+    char temp[100] = {0};
+    snprintf(temp,sizeof(temp),"[登录网关%s] (%s,%s,%lu,%u)",ret ? "成功" : "失败",message->phone().c_str(),message->passwd().c_str(),m_charID,code);
+    Debug(Flyer::logger,temp);
     return ret;
 }
 
@@ -177,6 +201,7 @@ bool GatewayTask::loginScene()
         {
             break;
         }
+        m_sceneID = sceneID;
         boost::shared_ptr<Client> client = ClientManager::getInstance().getServerClient(sceneID);
         if(!client)
         {
@@ -187,6 +212,10 @@ bool GatewayTask::loginScene()
         client->sendMsg(reqMsg);
         ret = true;
     }while(false);
+
+    char temp[100] = {0};
+    snprintf(temp,sizeof(temp),"[登录网关(请求登录场景)] (%s,%lu,%u)",ret ? "成功" : "失败",m_charID,m_sceneID);
+    Debug(Flyer::logger,temp);
     return ret;
 }
 
@@ -229,6 +258,9 @@ bool GatewayTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> m
     {
         loginScene();
     }
+    char temp[100] = {0};
+    snprintf(temp,sizeof(temp),"[登录网关(新建角色返回)] (%s,%s,%lu,%u)",ret ? "成功" : "失败",message->phone().c_str(),message->charid(),message->code());
+    Debug(Flyer::logger,temp);
     return ret;
 }
 

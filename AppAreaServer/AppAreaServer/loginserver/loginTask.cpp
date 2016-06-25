@@ -63,6 +63,9 @@ bool LoginTask::registerAccount(boost::shared_ptr<ProtoMsgData::ReqRegister> mes
     {
         nextStatus();
     }
+    char temp[100] = {0};
+    snprintf(temp,sizeof(temp),"[注册%s] (%s,%s,%u)",ret ? "成功" : "失败",message->phone().c_str(),message->passwd().c_str(),code);
+    Debug(Flyer::logger,temp);
     return ret;
 }
 
@@ -144,5 +147,8 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
     {
         nextStatus();
     }
+    char temp[100] = {0};
+    snprintf(temp,sizeof(temp),"[请求网关%s] (%s,%s,%s,%u,%u)",ret ? "成功" : "失败",message->phone().c_str(),message->passwd().c_str(),ackMsg.ip().c_str(),ackMsg.port(),code);
+    Debug(Flyer::logger,temp);
     return ret;
 }

@@ -59,10 +59,6 @@ bool Server::init()
         {
             MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ClientHandle>(new ClientHandle()));
         }
-        if(m_type == ProtoMsgData::ST_Login)
-        {
-            RedisMemManager::getInstance().clearMemory();
-        }
         if(!loadConf())
         {
             break;
@@ -70,6 +66,11 @@ bool Server::init()
         if(!RedisMemManager::getInstance().init())
         {
             break;
+        }
+        //清空redis
+        if(m_type == ProtoMsgData::ST_Login)
+        {
+            RedisMemManager::getInstance().clearMemory();
         }
         ret = true;
     }while(0);

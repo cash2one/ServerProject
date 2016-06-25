@@ -14,7 +14,8 @@ class SceneClient : public Client
     public:
         static SceneClientMessageDispatcher s_sceneClientMsgDispatcher;
     public:
-        static bool ackUserMsg(boost::shared_ptr<ProtoMsgData::AckLoginScene> message);
+        bool ackLoginScene(boost::shared_ptr<ProtoMsgData::AckLoginScene> message);
+        bool ackUserMsg(boost::shared_ptr<ProtoMsgData::AckUserMsg> message);
 };
 
 #endif

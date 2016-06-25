@@ -9,6 +9,7 @@
         <!--管理服ip和端口-->
         <superip>121.40.77.217</superip>
         <superport>10100</superport>
+        <superid>2</superid>
         <!--套接字的缓冲区-->
         <socketbuffersize>1024</socketbuffersize>
         <!--host:port:user:passwd:dbname-->

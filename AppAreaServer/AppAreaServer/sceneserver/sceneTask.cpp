@@ -80,6 +80,10 @@ bool SceneTask::login(const unsigned long charID)
     ackMsg.set_ret(ret);
     ackMsg.set_charid(charID);
     sendMsg(ackMsg);
+
+    char temp[100] = {0};
+    snprintf(temp,sizeof(temp),"[登录网关(登录场景)] (%s,%lu)",ret ? "成功" : "失败",charID);
+    Debug(Flyer::logger,temp);
     return ret;
 }
 

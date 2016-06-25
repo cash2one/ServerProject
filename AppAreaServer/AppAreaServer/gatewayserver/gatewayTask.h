@@ -20,6 +20,10 @@ class GatewayTask : public Connect
         {
             return m_charID;
         }
+        inline unsigned int getSceneID()
+        {
+            return m_sceneID;
+        }
     public:
         static GatewayMessageDispatcher s_gatewayMsgDispatcher;
     private:
@@ -27,5 +31,6 @@ class GatewayTask : public Connect
     private:
         unsigned long m_charID;
         bool m_isLogin;
+        unsigned int m_sceneID;
 };
 #endif
