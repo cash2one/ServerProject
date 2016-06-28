@@ -19,7 +19,7 @@
         <!--mysql连接最大使用时间单位为秒-->
         <maxmysqlusetime>1800</maxmysqlusetime>
         <!--accpet等待毫秒数-->
-        <acceptwaittime>10</acceptwaittime>
+        <acceptwaittime>-1</acceptwaittime>
         <!--增加epoll的大小-->
         <addepollsize>10</addepollsize>
         <!--主线程处理任务数量-->
