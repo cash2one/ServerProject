@@ -107,6 +107,23 @@ bool RedisMem::setInt(const char* table,const unsigned long key,const unsigned l
     return excelRetCheck();
 }
 
+bool RedisMem::delInt(const char* table,const unsigned long key)
+{
+    do
+    {
+        if(!isConnect())
+        {
+            break;
+        }
+        if(key)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%lu]",table,key);
+            break;
+        }
+        m_reply = (redisReply*)redisCommand(m_redis,"DEL %s",table);
+    }while(false);
+    return excelRetCheck();
+}
 
 Flyer::FlyerValue RedisMem::getInt(const char* table,const unsigned long key)
 {
@@ -145,6 +162,24 @@ bool RedisMem::setInt(const char* table,const char *key,const unsigned long valu
     return ret;
 }
 
+bool RedisMem::delInt(const char* table,const char *key)
+{
+    do
+    {
+        if(!isConnect())
+        {
+            break;
+        }
+        if(key)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%s]",table,key);
+            break;
+        }
+        m_reply = (redisReply*)redisCommand(m_redis,"DEL %s",table);
+    }while(false);
+    return excelRetCheck();
+}
+
 Flyer::FlyerValue RedisMem::getInt(const char* table,const char *key)
 {
     do
@@ -162,8 +197,6 @@ Flyer::FlyerValue RedisMem::getInt(const char* table,const char *key)
     }while(false);
     return getVal(RDT_Int);
 }
-
-
 
 bool RedisMem::setInt(const char* table,const unsigned long key,const char *col,const unsigned long value)
 {
@@ -184,6 +217,29 @@ bool RedisMem::setInt(const char* table,const unsigned long key,const char *col,
             break;
         }
         m_reply = (redisReply*)redisCommand(m_redis,"SET %s %lu",table,value);
+    }while(false);
+    return excelRetCheck();
+}
+
+bool RedisMem::delInt(const char* table,const unsigned long key,const char *col)
+{
+    do
+    {
+        if(!isConnect())
+        {
+            break;
+        }
+        if(col)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%lu]:%s",table,key,col);
+            break;
+        }
+        if(key)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%lu]",table,key);
+            break;
+        }
+        m_reply = (redisReply*)redisCommand(m_redis,"DEL %s",table);
     }while(false);
     return excelRetCheck();
 }
@@ -229,6 +285,24 @@ bool RedisMem::setString(const char* table,const unsigned long key,const char *v
     return excelRetCheck();
 }
 
+bool RedisMem::delString(const char* table,const unsigned long key)
+{
+    do
+    {
+        if(!isConnect())
+        {
+            break;
+        }
+        if(key)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%lu]",table,key);
+            break;
+        }
+        m_reply = (redisReply*)redisCommand(m_redis,"DEL %s",table);
+    }while(false);
+    return excelRetCheck();
+}
+
 Flyer::FlyerValue RedisMem::getString(const char* table,const unsigned long key)
 {
     do
@@ -261,6 +335,24 @@ bool RedisMem::setString(const char* table,const char *key,const char *value)
             break;
         }
         m_reply = (redisReply*)redisCommand(m_redis,"SET %s %s",table,value);
+    }while(false);
+    return excelRetCheck();
+}
+
+bool RedisMem::delString(const char* table,const char *key)
+{
+    do
+    {
+        if(!isConnect())
+        {
+            break;
+        }
+        if(key)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%s]",table,key);
+            break;
+        }
+        m_reply = (redisReply*)redisCommand(m_redis,"DEL %s %s",table);
     }while(false);
     return excelRetCheck();
 }
@@ -306,7 +398,30 @@ bool RedisMem::setSet(const char* table,const unsigned long key,const char *set,
     return excelRetCheck();
 }
 
-Flyer::FlyerValue RedisMem::getSet(const char* table,const unsigned long key,const char *set,std::set<std::string> &retSet,const unsigned int cnt)
+bool RedisMem::delSet(const char* table,const unsigned long key,const char *set)
+{
+    do
+    {
+        if(!isConnect())
+        {
+            break;
+        }
+        if(set)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%lu]:%s",table,key,set);
+            break;
+        }
+        if(key)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%lu]",table,key);
+            break;
+        }
+        m_reply = (redisReply*)redisCommand(m_redis,"DEL %s",table);
+    }while(false);
+    return excelRetCheck();
+}
+
+bool RedisMem::getSet(const char* table,const unsigned long key,const char *set,std::set<std::string> &retSet,const unsigned int cnt)
 {
     bool ret = false;
     do
@@ -341,7 +456,7 @@ Flyer::FlyerValue RedisMem::getSet(const char* table,const unsigned long key,con
     return ret;
 }
 
-Flyer::FlyerValue RedisMem::getSet(const char* table,const char *set,std::set<unsigned long> &retSet,const unsigned int cnt)
+bool RedisMem::getSet(const char* table,const char *set,std::set<unsigned long> &retSet,const unsigned int cnt)
 {
     bool ret = false;
     do
@@ -371,7 +486,7 @@ Flyer::FlyerValue RedisMem::getSet(const char* table,const char *set,std::set<un
     return ret;
 }
 
-Flyer::FlyerValue RedisMem::getSet(const char* table,const char *set,std::set<unsigned long> &retSet)
+bool RedisMem::getSet(const char* table,const char *set,std::set<unsigned long> &retSet)
 {
     bool ret = false;
     do
@@ -420,7 +535,25 @@ bool RedisMem::setSet(const char* table,const char *set,const unsigned long valu
     return excelRetCheck();
 }
 
-Flyer::FlyerValue RedisMem::getSet(const char* table,const char *set,std::set<std::string> &retSet,const unsigned int cnt)
+bool RedisMem::delSet(const char* table,const char *set)
+{
+    do
+    {
+        if(!isConnect())
+        {
+            break;
+        }
+        if(set)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:%s",table,set);
+            break;
+        }
+        m_reply = (redisReply*)redisCommand(m_redis,"DEL %s",table);
+    }while(false);
+    return excelRetCheck();
+}
+
+bool RedisMem::getSet(const char* table,const char *set,std::set<std::string> &retSet,const unsigned int cnt)
 {
     bool ret = false;
     do
@@ -450,7 +583,7 @@ Flyer::FlyerValue RedisMem::getSet(const char* table,const char *set,std::set<st
     return ret;
 }
 
-Flyer::FlyerValue RedisMem::getSet(const char* table,const char *set,std::set<std::string> &retSet)
+bool RedisMem::getSet(const char* table,const char *set,std::set<std::string> &retSet)
 {
     bool ret = false;
     do
@@ -494,6 +627,24 @@ bool RedisMem::setBin(const char* table,const unsigned long key,const char *val,
             break;
         }
         m_reply = (redisReply*)redisCommand(m_redis,"SET %s %b",table,val,len);
+    }while(false);
+    return excelRetCheck();
+}
+
+bool RedisMem::delBin(const char* table,const unsigned long key)
+{
+    do
+    {
+        if(!isConnect())
+        {
+            break;
+        }
+        if(key)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%lu]",table,key);
+            break;
+        }
+        m_reply = (redisReply*)redisCommand(m_redis,"DEL %s",table);
     }while(false);
     return excelRetCheck();
 }
@@ -549,6 +700,29 @@ bool RedisMem::setBin(const char* table,const unsigned long key,const char *col,
             break;
         }
         m_reply = (redisReply*)redisCommand(m_redis,"SET %s %b",table,val,len);
+    }while(false);
+    return excelRetCheck();
+}
+
+bool RedisMem::delBin(const char* table,const unsigned long key,const char *col)
+{
+    do
+    {
+        if(!isConnect())
+        {
+            break;
+        }
+        if(col)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%lu]",table,key,col);
+            break;
+        }
+        if(key)
+        {
+            m_reply = (redisReply*)redisCommand(m_redis,"SET %s:[%lu]",table,key);
+            break;
+        }
+        m_reply = (redisReply*)redisCommand(m_redis,"SET %s",table);
     }while(false);
     return excelRetCheck();
 }

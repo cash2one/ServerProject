@@ -30,6 +30,7 @@ void SuperTimeTick::run()
         {
             TaskManager::getInstance().sendHeartMsg();
         }
+        msleep(atol(Flyer::globalConfMap["threadsleep"].c_str()));
     }
 }
 

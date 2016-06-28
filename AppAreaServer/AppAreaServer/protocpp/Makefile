@@ -9,7 +9,7 @@ CFLAGS         := -std=c++11 $(FLYER_COMPILE_OPT) $(PIC_FLAG) -Wall -D_GNU_SOURC
 LDFLAG         := $(FLYER_COMPILE_OPT) -Wall -L/usr/local/protobuf/lib/ -lprotobuf
 
 ####### Files
-src = serialize.pb.cc system.pb.cc common.pb.cc login.pb.cc 
+src = serialize.pb.cc system.pb.cc common.pb.cc login.pb.cc attr.pb.cc
 		
 
 object = $(patsubst %.cc,%.o,$(src))

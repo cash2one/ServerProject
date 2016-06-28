@@ -23,6 +23,7 @@ void GatewayTimeTick::run()
                 Flyer::changeLogger(fileName,s_time.sec());
             }
         }
+        msleep(atol(Flyer::globalConfMap["threadsleep"].c_str()));
     }
 }
 

@@ -26,6 +26,9 @@
         <member name="ret" prefix="optional" type="bool" default="false" desc="结果"/>
     </proto>
     
+    <proto name="AckOnLine" desc="登陆成功刷新">
+    </proto>
+    
 
 
 

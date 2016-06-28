@@ -501,9 +501,10 @@ def create_cpp_cpp_function(classArr):
 
     cppCode += "\n" 
     for key in classArr: 
-        cppCode += "\tconst %s::Conf_t_%s& %s(const unsigned int id)\n" %(SERVER_NAME_SPACE,key,key)
+        cppCode += "\tconst %s::Conf_t_%s& get%s(const unsigned int id)\n" %(SERVER_NAME_SPACE,key,key)
         cppCode += "\t{\n"
         cppCode += "\t\t return _%s.get(id);\n\t}\n" %(key)
+
     
     ret[0] = True
     ret.append(cppCode)
@@ -517,7 +518,7 @@ def create_cpp_head_function(classArr):
     
     cppCode += "\n"
     for key in classArr: 
-        cppCode += "\tconst %s::Conf_t_%s& %s(const unsigned int id);\n" %(SERVER_NAME_SPACE,key,key)
+        cppCode += "\tconst %s::Conf_t_%s& get%s(const unsigned int id);\n" %(SERVER_NAME_SPACE,key,key)
     
     ret[0] = True
     ret.append(cppCode)

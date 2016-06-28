@@ -11,6 +11,12 @@
         <member name="code" prefix="optional" type="ErrorCode" desc="错误码"/>
     </proto>
     
+    <proto name="Key32Val32Pair" desc="键32值32">
+        <member name="key" prefix="required" type="uint32" desc="键"/>
+        <member name="val" prefix="required" type="uint32" desc="值"/>
+    </proto>
+    
+
 
 
 
