@@ -117,6 +117,67 @@ bool RecordDataManager::loadUserData()
     return ret;
 }
 
+bool RecordDataManager::loop()
+{
+    bool ret = false;
+    do
+    {
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
+        if(!redisMem)
+        {
+            break;
+        }
+        boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
+        if(!handle)
+        {
+            break;
+        }
+        std::set<unsigned long> idSet;
+        if(!redisMem->getSet("serialize","userset",idSet))
+        {
+            break;
+        }
+        for(auto iter = idSet.begin();iter != idSet.end();++iter)
+        {
+            bool flag = false;
+            unsigned long charID = *iter;
+            do
+            {
+                redisMem = RedisMemManager::getInstance().getRedis(charID);
+                if(!redisMem)
+                {
+                    break;
+                }
+                unsigned char buffer[Flyer::msglen];
+                bzero(buffer,sizeof(buffer));
+                unsigned int size = redisMem->getBin("serialize",charID,"user",(char*)buffer);
+                if(!size)
+                {
+                    break;
+                }
+
+                ProtoMsgData::UserBinary binary;
+                binary.ParseFromArray(buffer,size);
+                std::ostringstream oss;
+                oss << "update t_user set phone = " << binary.phone() << "," << "binary = ";
+                handle->getRealString(buffer,binary.ByteSize(),oss);
+                oss << " where charid = " << charID;
+                if(!handle->execSql(oss.str().c_str(),oss.str().size()))
+                {
+                    break;
+                }
+                flag = true;
+            }while(false);
+            if(!flag)
+            {
+                Debug(Flyer::logger,"[数据库存档角色数据]失败(" << charID << ")");
+            }
+        }
+        ret = true;
+    }while(false);
+    return ret;
+}
+
 bool RecordDataManager::createUser(const std::string &phone,unsigned long &charID)
 {
     bool ret = false;

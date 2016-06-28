@@ -13,6 +13,7 @@ class SceneUserManager : public Singleton<SceneUserManager>
     public:
         bool add(boost::shared_ptr<SceneUser> user);
         void del(const unsigned long charID);
+        void loop();
     private:
         std::map<unsigned long,boost::shared_ptr<SceneUser> > m_userMap;
 };

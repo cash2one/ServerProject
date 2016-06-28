@@ -1,9 +1,16 @@
 #include "sceneUser.h"
 #include "clientManager.h"
 #include "parseMessage.h"
+#include "excelManager.h"
+#include "login.pb.h"
+#include "sceneTimeTick.h"
+#include "excel.h"
+#include "flyerMD5.h"
+#include "redisMemManager.h"
 
 SceneUser::SceneUser(const unsigned long charID,const unsigned short gatewayID) : m_charID(charID),m_phone(),m_gatewayID(gatewayID),m_onTime(0),m_offTime(0)
 {
+    bzero(m_lastMD5,sizeof(m_lastMD5));
 }
 
 SceneUser::~SceneUser()
@@ -27,13 +34,16 @@ bool SceneUser::parseFromBinary(const ProtoMsgData::UserBinary &binary)
     return ret;
 }
 
-bool SceneUser::serializeToArray(ProtoMsgData::UserBinary &binary)
+bool SceneUser::serializeToBinary(ProtoMsgData::UserBinary &binary)
 {
     bool ret = false;
     do
     {
         binary.set_charid(m_charID);
         binary.set_phone(m_phone);
+        binary.set_ontime(m_onTime);
+        binary.set_offtime(m_offTime);
+        ret = true;
     }while(false);
     return ret;
 }
@@ -78,6 +88,95 @@ bool SceneUser::onLine()
     bool ret = false;
     do
     {
+        if(!m_onTime)
+        {
+            if(!initAttr())
+            {
+                break;
+            }
+            m_onTime = SceneTimeTick::getInstance().s_time.sec();
+        }
+        ret = true;
     }while(false);
+
+    ProtoMsgData::AckOnLine ackMsg;
+    ret = sendUserMsg(ackMsg);     
     return ret;
+}
+
+bool SceneUser::initAttr()
+{
+    bool ret = false;
+    do
+    {
+        const ExcelConf::Conf_t_Init &init = ExcelTbx::getInit(1);
+        const std::map<ProtoMsgData::AttrType,unsigned int> &attrMap = init.getAttrMap();
+        for(auto iter = attrMap.begin();iter != attrMap.end();++iter)
+        {
+            m_attrMap.insert(std::pair<ProtoMsgData::AttrType,unsigned int>(iter->first,iter->second));
+        }
+    }while(false);
+
+    ProtoMsgData::AckOnLine ackMsg;
+    ret = sendUserMsg(ackMsg);     
+    return ret;
+}
+
+unsigned int SceneUser::serializeToArray(unsigned char array[])
+{
+    ProtoMsgData::UserBinary binary;
+    serializeToBinary(binary);
+    binary.SerializeToArray(array,Flyer::msglen);
+    return binary.ByteSize();
+}
+
+bool SceneUser::saveData(const bool force)
+{
+    MsgRet ret = MR_No_Register;
+    do
+    {
+        bool saveFlg = true;
+        unsigned char buffer[Flyer::msglen];
+        bzero(buffer,sizeof(buffer));
+        unsigned int size = serializeToArray(buffer);
+        unsigned char md5[16];
+        bzero(md5,sizeof(md5));
+        Flyer::MD5Data(buffer,size,md5);
+        if(!force)
+        {
+            if(!strncmp((const char*)md5,(const char*)m_lastMD5,sizeof(md5)))
+            {
+                saveFlg = false;
+            }
+            else
+            {
+                bcopy(md5,m_lastMD5,sizeof(md5));
+            }
+        }
+       if(!saveFlg)
+       {
+           break;
+       }
+       ret = MR_False;
+       boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis(m_charID);
+       if(!redisMem)
+       {
+           break;
+       }
+       if(!redisMem->setBin("serialize",m_charID,"user",(const char*)buffer,size))
+       {
+           break;
+       }
+       redisMem = RedisMemManager::getInstance().getRedis();
+       if(!redisMem)
+       {
+           break;
+       }
+       if(!redisMem->setSet("serialize","userset",m_charID))
+       {
+           break;
+       }
+       ret = MR_True;
+    }while(false);
+    return ret == MR_False ? false : true;
 }
