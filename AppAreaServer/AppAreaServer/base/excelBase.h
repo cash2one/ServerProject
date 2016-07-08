@@ -43,6 +43,7 @@ namespace ExcelTbx
                     }
                     else
                     {
+                        Info(Flyer::logger,"[加载表格错误](" << conf->getKey() << "("); 
                         delete conf;
                         conf = NULL;
                     }

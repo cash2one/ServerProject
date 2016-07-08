@@ -135,7 +135,7 @@ namespace ExcelConf
         bool ret = false;
         do
         {
-            m_key = m_init ? m_init->tbxid() : 0;
+            m_key = m_init ? m_init->id() : 0;
             if(!m_key)
             {
                 break;
@@ -154,7 +154,7 @@ namespace ExcelConf
         bool ret = false;
         do
         {
-            m_key = m_attr ? m_attr->tbxid() : 0;
+            m_key = m_attr ? m_attr->id() : 0;
             if(!m_key)
             {
                 break;

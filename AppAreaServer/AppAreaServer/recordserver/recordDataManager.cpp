@@ -155,11 +155,19 @@ bool RecordDataManager::loop()
                 {
                     break;
                 }
-
+                redisMem = RedisMemManager::getInstance().getRedis();
+                if(!redisMem)
+                {
+                    break;
+                }
+                if(!redisMem->delSet("serialize",charID,"userset"))
+                {
+                    break;
+                }
                 ProtoMsgData::UserBinary binary;
                 binary.ParseFromArray(buffer,size);
                 std::ostringstream oss;
-                oss << "update t_user set phone = " << binary.phone() << "," << "binary = ";
+                oss << "update t_user set `phone` = " << binary.phone() << "," << "`binary` = ";
                 handle->getRealString(buffer,binary.ByteSize(),oss);
                 oss << " where charid = " << charID;
                 if(!handle->execSql(oss.str().c_str(),oss.str().size()))

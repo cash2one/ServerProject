@@ -7,6 +7,7 @@
 #include "excel.h"
 #include "flyerMD5.h"
 #include "redisMemManager.h"
+#include "taskManager.h"
 
 SceneUser::SceneUser(const unsigned long charID,const unsigned short gatewayID) : m_charID(charID),m_phone(),m_gatewayID(gatewayID),m_onTime(0),m_offTime(0)
 {
@@ -58,12 +59,7 @@ bool SceneUser::sendUserMsg(const google::protobuf::Message &message)
         ProtoMsgData::AckUserMsg ackMsg;
         ackMsg.set_charid(m_charID);
         ackMsg.set_data(msg);
-        boost::shared_ptr<Client> client = ClientManager::getInstance().getServerClient(m_gatewayID);
-        if(!client)
-        {
-            break;
-        }
-        ret = client->sendMsg(ackMsg);
+        ret = sendGatewayMsg(ackMsg);
     }while(false);
     return ret;
 }
@@ -73,12 +69,12 @@ bool SceneUser::sendGatewayMsg(const google::protobuf::Message &message)
     bool ret = false;
     do
     {
-        boost::shared_ptr<Client> client = ClientManager::getInstance().getServerClient(m_gatewayID);
-        if(!client)
+        boost::shared_ptr<Connect> connect = TaskManager::getInstance().getServerTask(m_gatewayID);
+        if(!connect)
         {
             break;
         }
-        ret = client->sendMsg(message);
+        ret = connect->sendMsg(message);
     }while(false);
     return ret;
 }
@@ -96,11 +92,9 @@ bool SceneUser::onLine()
             }
             m_onTime = SceneTimeTick::getInstance().s_time.sec();
         }
-        ret = true;
+        ProtoMsgData::AckOnLine ackMsg;
+        ret = sendUserMsg(ackMsg);     
     }while(false);
-
-    ProtoMsgData::AckOnLine ackMsg;
-    ret = sendUserMsg(ackMsg);     
     return ret;
 }
 
@@ -109,16 +103,18 @@ bool SceneUser::initAttr()
     bool ret = false;
     do
     {
-        const ExcelConf::Conf_t_Init &init = ExcelTbx::getInit(1);
-        const std::map<ProtoMsgData::AttrType,unsigned int> &attrMap = init.getAttrMap();
+        const ExcelConf::Conf_t_Init *init = ExcelTbx::Init().getBase(1);
+        if(!init)
+        {
+            break;
+        }
+        const std::map<ProtoMsgData::AttrType,unsigned int> &attrMap = init->getAttrMap();
         for(auto iter = attrMap.begin();iter != attrMap.end();++iter)
         {
             m_attrMap.insert(std::pair<ProtoMsgData::AttrType,unsigned int>(iter->first,iter->second));
         }
+        ret = true;
     }while(false);
-
-    ProtoMsgData::AckOnLine ackMsg;
-    ret = sendUserMsg(ackMsg);     
     return ret;
 }
 

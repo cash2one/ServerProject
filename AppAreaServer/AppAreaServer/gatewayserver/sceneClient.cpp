@@ -69,13 +69,12 @@ bool SceneClient::ackUserMsg(boost::shared_ptr<ProtoMsgData::AckUserMsg> message
         {
             break;
         }
-        ret = true;
         google::protobuf::Message *proMsg = msg.get();
         if(!proMsg)
         {
             break;
         }
-        gatewayTask->sendMsg(*proMsg);
+        ret = gatewayTask->sendMsg(*proMsg);
     }while(false);
     return ret;
 }

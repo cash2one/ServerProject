@@ -570,7 +570,8 @@ def check_tbx_file(sheet):
 #生成tbx节点中的每一个元素
 def write_tbx_row_obj(sheet,obj,keyArr,row):
     colArr = sheet.row_values(row)
-    key = colArr[0]
+    #key = colArr[0]
+    key = row
     try:
         exec "obj.{0} = int(key)".format("tbxid")
     except:

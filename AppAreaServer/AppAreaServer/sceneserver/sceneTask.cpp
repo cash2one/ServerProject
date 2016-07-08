@@ -75,6 +75,10 @@ bool SceneTask::login(const unsigned long charID)
         {
             break;
         }
+        if(!user->onLine())
+        {
+            break;
+        }
         ret = true;
     }while(false);
     ackMsg.set_ret(ret);

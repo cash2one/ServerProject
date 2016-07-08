@@ -2,10 +2,11 @@
 #include "flyer.h"
 #include "taskManager.h"
 #include "recordServer.h"
+#include "recordDataManager.h"
 
 Time RecordTimeTick::s_time;
 
-RecordTimeTick::RecordTimeTick() : Thread("服务器时间线程"),m_secClock(1000),m_minClock(60*1000),m_hourClock(60*60*1000),m_halfHourClock(30*60*1000)
+RecordTimeTick::RecordTimeTick() : Thread("服务器时间线程"),m_secClock(1000),m_minClock(60*1000),m_hourClock(60*60*1000),m_halfHourClock(30*60*1000),m_tenSecClock(10*1000)
 {
 }
 
@@ -27,9 +28,9 @@ void RecordTimeTick::run()
         {
             TaskManager::getInstance().sendHeartMsg();
         }
-        if(m_minClock(s_time))
+        if(m_tenSecClock(s_time))
         {
-            TaskManager::getInstance().sendHeartMsg();
+            RecordDataManager::getInstance().loop();
         }
         msleep(atol(Flyer::globalConfMap["threadsleep"].c_str()));
     }
