@@ -13,7 +13,7 @@ bool RecordHandle::init()
 #define MESSAGE_INIT(msg,call) \
 {\
     boost::shared_ptr<MsgCallBack<boost::shared_ptr<RecordClient>,ProtoMsgData::msg> > callBack(new MsgCallBack<boost::shared_ptr<RecordClient>,ProtoMsgData::msg>(&RecordHandle::call));\
-    RecordTask::s_recordMsgDispatcher.messageReg<ProtoMsgData::msg>(callBack);\
+    RecordClient::s_recordMsgDispatcher.messageReg<ProtoMsgData::msg>(callBack);\
 }
 #undef MESSAGE_INIT
     return true;

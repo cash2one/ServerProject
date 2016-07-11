@@ -13,7 +13,7 @@ DEBUG_OPT = $(WARNING_OPT) $(MACRO_OPT) $(DIR_OPT)
 #编译库文件路径
 SUB_DIR = protocpp base excelcode
 #目标文件路径
-TARGET_DIR = loginserver superserver recordserver sceneserver gatewayserver
+TARGET_DIR = loginserver superserver recordserver sceneserver gatewayserver robotserver
 #cpu核数
 NJOBS = `if [ "" == "$(NCPUS)" ]; then echo ""; else echo "-j$(NCPUS)"; fi`
 

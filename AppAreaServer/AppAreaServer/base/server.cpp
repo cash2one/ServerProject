@@ -49,7 +49,7 @@ bool Server::init()
         {
             break;
         }
-        if(m_type != ProtoMsgData::ST_Login && m_type != ProtoMsgData::ST_Super)
+        if(m_type != ProtoMsgData::ST_Robot && m_type != ProtoMsgData::ST_Login && m_type != ProtoMsgData::ST_Super)
         {
             MessageHandleManager::getInstance().addHandle(boost::shared_ptr<SuperClientHandle>(new SuperClientHandle()));
             m_superClient = boost::shared_ptr<SuperClient>(new SuperClient(this));

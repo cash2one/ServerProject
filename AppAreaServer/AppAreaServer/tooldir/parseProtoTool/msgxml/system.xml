@@ -11,6 +11,7 @@
         <member name="ST_Record" value="3" desc="档案服务器"/>
         <member name="ST_Scene" value="4" desc="场景服务器"/>
         <member name="ST_Gateway" value="5" desc="网关服务器"/>
+        <member name="ST_Robot" value="6" desc="机器人服务器"/>
     </enum>
     
     <enum name="ServerStatus" desc="服务器状态">
