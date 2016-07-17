@@ -37,10 +37,10 @@ bool LoginTask::registerAccount(boost::shared_ptr<ProtoMsgData::ReqRegister> mes
             code = ProtoMsgData::EC_Register_Again;
             break;
         }
-        char temp[100] = {0};
-        snprintf(temp,sizeof(temp),"insert into t_register(phone,passwd,regtime) values(%s,%s,current_timestamp)",message->phone().c_str(),message->passwd().c_str());
+        std::ostringstream oss;
+        oss << "insert into t_register(phone,passwd,regtime) values" << "('" << message->phone() << "'," << "'" << message->passwd() << "',current_timestamp)"; 
         boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
-        if(!handle->execSql(temp,strlen(temp)))
+        if(!handle->execSql(oss.str().c_str(),oss.str().size()))
         {
             break;
         }
@@ -48,6 +48,8 @@ bool LoginTask::registerAccount(boost::shared_ptr<ProtoMsgData::ReqRegister> mes
         {
             break;
         }
+        std::string getKey =  redisMem->getString("register",message->phone().c_str());
+        Info(Flyer::logger,"[注册取回](" << getKey << ")");
         ret = true;
     }while(false);
     if(code != ProtoMsgData::EC_Default)
@@ -59,13 +61,9 @@ bool LoginTask::registerAccount(boost::shared_ptr<ProtoMsgData::ReqRegister> mes
     ProtoMsgData::AckRegister ackMsg;
     ackMsg.set_ret(ret);
     sendMsg(ackMsg);
-    if(ret)
-    {
-        nextStatus();
-    }
-    char temp[100] = {0};
-    snprintf(temp,sizeof(temp),"[注册%s] (%s,%s,%u)",ret ? "成功" : "失败",message->phone().c_str(),message->passwd().c_str(),code);
-    Debug(Flyer::logger,temp);
+    std::ostringstream oss;
+    oss << "[注册 " << (ret ? "成功" : "失败") << "] (" << message->phone() << "," << message->passwd() << ")";
+    Debug(Flyer::logger,oss.str().c_str());
     return ret;
 }
 
@@ -145,10 +143,11 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
     sendMsg(ackMsg);
     if(ret)
     {
-        nextStatus();
+        setVerify(true);
     }
-    char temp[100] = {0};
-    snprintf(temp,sizeof(temp),"[请求网关%s] (%s,%s,%s,%u,%u)",ret ? "成功" : "失败",message->phone().c_str(),message->passwd().c_str(),ackMsg.ip().c_str(),ackMsg.port(),code);
-    Debug(Flyer::logger,temp);
+    std::ostringstream oss;
+    oss << "[请求网关" << (ret ? "成功" : "失败") << "] (" << message->phone() << "," << message->passwd() << "," << ackMsg.ip() << "," << ackMsg.port() << "," << code << ")"; 
+    Debug(Flyer::logger,oss.str().c_str());
+    setStatus(Task_Status_Recycle);
     return ret;
 }

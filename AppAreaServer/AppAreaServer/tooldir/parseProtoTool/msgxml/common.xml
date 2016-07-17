@@ -6,6 +6,7 @@
         <member name="EC_Register_No" value="2" desc="没有注册"/>
         <member name="EC_Passwd_Wrong" value="3" desc="密码错误"/>
         <member name="EC_Gateway_Wrong" value="4" desc="网关错误"/>
+        <member name="EC_Create_Role" value="5" desc="创角错误"/>
     </enum>
     <proto name="AckErrorCode" desc="错误码返回">
         <member name="code" prefix="optional" type="ErrorCode" desc="错误码"/>

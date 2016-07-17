@@ -19,6 +19,7 @@ class RobotTimeTick : public Thread , public Singleton<RobotTimeTick>
         TimeClock m_hourClock;
         TimeClock m_halfHourClock;
         TimeClock m_tenSecClock;
+        TimeClock m_halfSecClock;
 };
 
 #endif

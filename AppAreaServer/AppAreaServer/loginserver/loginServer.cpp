@@ -76,6 +76,7 @@ bool LoginServer::acceptConnect(const int socket,const int listenPort)
             boost::shared_ptr<LoginTask> task(new LoginTask(socket));
             if(TaskManager::getInstance().addTask(task))
             {
+                task->setServerType(ProtoMsgData::ST_Client);
                 task->nextStatus();
                 ret = VerifyThread::getInstance().add(task);
             }
@@ -102,9 +103,9 @@ bool LoginServer::initLoginIp()
         {
             break;
         }
-        char temp[100] = {0};
-        snprintf(temp,sizeof(temp),"select id,ip,port,outip,outport from t_serverinfo where servertype = %u",ProtoMsgData::ST_Login);
-        if(!handle->select(temp,strlen(temp),ipVec))
+        std::ostringstream oss;
+        oss << "select id,ip,port,outip,outport from t_serverinfo where servertype = " << ProtoMsgData::ST_Login;
+        if(!handle->select(oss.str().c_str(),oss.str().size(),ipVec))
         {
             break;
         }

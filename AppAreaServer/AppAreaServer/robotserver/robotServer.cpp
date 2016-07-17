@@ -1,16 +1,13 @@
 #include "robotServer.h"
 #include "flyer.h"
-#include "superClient.h"
 #include "messageHandle.h"
 #include "excelBase.h"
-#include "sceneTimeTick.h"
-#include "recordClient.h"
-#include "recordHandle.h"
-#include "taskManager.h"
+#include "robotTimeTick.h"
 #include "recycleThread.h"
 #include "verifyThread.h"
 #include "robotHandle.h"
 #include "redisMemManager.h"
+#include "logicManager.h"
 
 RobotServer::RobotServer() : Server("机器人服务器",ProtoMsgData::ST_Robot)
 {
@@ -34,12 +31,6 @@ bool RobotServer::init()
         {
             break;
         }
-        m_ip = Flyer::globalConfMap["robotip"].c_str();
-        m_port = atol(Flyer::globalConfMap["robotport"].c_str());
-        if(!listenPort())
-        {
-            break;
-        }
         startThread();
         ret = true;
     }while(false);
@@ -60,6 +51,8 @@ void RobotServer::endServerThread()
 
 bool RobotServer::loadConf()
 {
+    return true;
+#if 0
     bool ret = false;
     do
     {
@@ -70,6 +63,7 @@ bool RobotServer::loadConf()
         ret = true;
     }while(false);
     return ret;
+#endif
 }
 
 bool RobotServer::loadExcelConf()
@@ -91,7 +85,6 @@ bool RobotServer::acceptConnect(const int socket,const int listenPort)
     return ret;
 }
 
-
 int main()
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -101,8 +94,10 @@ int main()
     Flyer::setLogger("log/robot.log");
     if(RobotServer::getInstance().init())
     {
-        Info(Flyer::logger,"[场景服务器] 启动成功");
-        RobotServer::getInstance().main();
+        Info(Flyer::logger,"[机器人服务器] 启动成功");
+        std::string cmd = "cmd=ReqRegister,phone=333,num=5000";
+        LogicManager::getInstance().add(cmd);
+        LogicManager::getInstance().waitCmd();
     }
     google::protobuf::ShutdownProtobufLibrary();
     return 0;

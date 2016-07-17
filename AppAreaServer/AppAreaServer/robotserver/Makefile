@@ -11,7 +11,7 @@ src = robotServer.cpp\
 	  robotTimeTick.cpp\
 	  robotClient.cpp\
 	  robotHandle.cpp\
-	  inputThread.cpp
+	  logicManager.cpp
 
 object = $(patsubst %.cpp,%.o,$(src))
 depend = $(patsubst %.cpp,%.d,$(src))

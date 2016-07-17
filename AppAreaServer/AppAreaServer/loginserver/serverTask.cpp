@@ -35,9 +35,9 @@ bool ServerTask::verify(const ProtoMsgData::ServerInfo &serverInfo)
         {
             break;
         }
-        char temp[100] = {0};
-        snprintf(temp,sizeof(temp),"select id,ip,port from t_logininfo where servertype = %u",serverInfo.servertype());
-        if(!handle->select(temp,strlen(temp),ipVec))
+        std::ostringstream oss;
+        oss << "select id,ip,port from t_logininfo where servertype = " << serverInfo.servertype();
+        if(!handle->select(oss.str().c_str(),oss.str().size(),ipVec))
         {
             break;
         }
@@ -60,7 +60,7 @@ bool ServerTask::verify(const ProtoMsgData::ServerInfo &serverInfo)
             ProtoMsgData::ServerInfo tempInfo = serverInfo;
             tempInfo.set_id(id);
             LoginServer::getInstance().addServer(tempInfo);
-            nextStatus();
+            setVerify(true);
             ret = true;
             break;
         }
