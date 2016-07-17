@@ -15,10 +15,10 @@ namespace ExcelConf
 
     //解析string到vec
     void parseTagString(const std::string &src,std::vector<std::string> &retVec,const std::string &tag);
-    bool parseIntToIntMap(const std::string &src,std::map<unsigned int,unsigned int> retMap,const std::string &midTag = "-",const std::string &endTag = ";");
-    bool parseIntToStringMap(const std::string &src,std::map<unsigned int,std::string> retMap,const std::string &midTag = "-",const std::string &endTag = ";");
-    bool parseStringToStringMap(const std::string &src,std::map<std::string,std::string> retMap,const std::string &midTag = "-",const std::string &endTag = ";");
-    bool parseAttrMap(const std::string &src,std::map<ProtoMsgData::AttrType,unsigned int> retMap,const std::string &midTag = "-",const std::string &endTag = ";");
+    bool parseIntToIntMap(const std::string &src,std::map<unsigned int,unsigned int> &retMap,const std::string &midTag = "-",const std::string &endTag = ";");
+    bool parseIntToStringMap(const std::string &src,std::map<unsigned int,std::string> &retMap,const std::string &midTag = "-",const std::string &endTag = ";");
+    bool parseStringToStringMap(const std::string &src,std::map<std::string,std::string> &retMap,const std::string &midTag = "-",const std::string &endTag = ";");
+    bool parseAttrMap(const std::string &src,std::map<ProtoMsgData::AttrType,unsigned int> &retMap,const std::string &midTag = "-",const std::string &endTag = ";");
 
     class Conf_t_Init
     {

@@ -30,6 +30,7 @@ class Server
         boost::shared_ptr<SuperClient> m_superClient;
     private:
         int accept(std::map<int,int> &socketMap);
+        std::string getNodeName();
     public:
         bool init();
         void serverCallBack();
@@ -63,19 +64,19 @@ class Server
                 {
                     break;
                 }
-                char temp[100] = {0};
-                snprintf(temp,sizeof(temp),"select id,ip,port from t_serverinfo where servertype = %u",connectType);
-                if(!handle->select(temp,strlen(temp),ipVec))
+                std::ostringstream oss;
+                oss << "select id,ip,port from t_serverinfo where servertype = " << connectType;
+                if(!handle->select(oss.str().c_str(),oss.str().size(),ipVec))
                 {
                     break;
                 }
-                bool breakFlg = false;
+                bool breakFlg = true;
                 for(unsigned int cnt = 0;cnt < ipVec.size();++cnt)
                 {
                     std::map<std::string,Flyer::FlyerValue> &tempMap = ipVec[cnt];
                     if(tempMap.find("id") == tempMap.end())
                     {
-                        continue;
+                        break;
                     }
                     unsigned int id = tempMap["id"];
                     unsigned int port = tempMap["port"];
@@ -83,17 +84,15 @@ class Server
                     int fd = 0;
                     if(!Client::connectOwner(fd,ip,port))
                     {
-                        char temp[100] = {0};
-                        snprintf(temp,sizeof(temp),"[客户端连接服务器] 连接错误(%u,%u,%u,%s,%u",id,connectType,curType,ip.c_str(),port);
-                        LOG4CXX_INFO(Flyer::logger,temp);
-                        breakFlg = true;
+                        oss.str("");
+                        oss << "[客户端连接服务器] 连接错误" << id << "," << connectType << "," << curType << "," << ip << "," << port << ")";
+                        LOG4CXX_INFO(Flyer::logger,oss.str().c_str());
                         break;
                     }
                     ProtoMsgData::ReqVerifyServer reqVerifyServer;
                     ProtoMsgData::ServerInfo *info = reqVerifyServer.mutable_serverinfo();
                     if(!info)
                     {
-                        breakFlg = true;
                         break;
                     }
                     info->set_servertype(curType);
@@ -105,14 +104,13 @@ class Server
                     client->setServerType(connectType);
                     if(!ClientManager::getInstance().add(client))
                     {
-                        breakFlg = true;
                         break;
                     }
                     if(!client->sendMsg(reqVerifyServer))
                     {
-                        breakFlg = true;
                         break;
                     }
+                    breakFlg = false;
                 }
                 if(breakFlg)
                 {

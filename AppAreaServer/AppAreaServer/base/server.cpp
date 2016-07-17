@@ -32,12 +32,54 @@ Server::~Server()
     TEMP_FAILURE_RETRY(::close(m_epfd));
 }
 
+std::string Server::getNodeName()
+{
+    std::string nodeName;
+    switch(m_type)
+    {
+        case ProtoMsgData::ST_Login:
+            {
+                nodeName = "login";
+            }
+            break;
+        case ProtoMsgData::ST_Super:
+            {
+                nodeName = "super";
+            }
+            break;
+        case ProtoMsgData::ST_Record:
+            {
+                nodeName = "record";
+            }
+            break;
+        case ProtoMsgData::ST_Scene:
+            {
+                nodeName = "scene";
+            }
+            break;
+        case ProtoMsgData::ST_Gateway:
+            {
+                nodeName = "gateway";
+            }
+            break;
+        case ProtoMsgData::ST_Robot:
+            {
+                nodeName = "robot";
+            }
+            break;
+        default:
+            break;
+    }
+    return nodeName;
+}
+
 bool Server::init()
 {
     bool ret = false;
     do
     {
-        if(!Flyer::loadXmlConf("configdir/config.xml"))
+        std::string nodeName = getNodeName();
+        if(!Flyer::loadXmlConf("configdir/config.xml",nodeName.c_str()))
         {
             break;
         }
@@ -274,8 +316,13 @@ void Server::addServer(const ProtoMsgData::ServerInfo &info)
 
 ProtoMsgData::ServerInfo* Server::getServer(const unsigned int id)
 {
+    ProtoMsgData::ServerInfo* ret = NULL;
     auto iter = m_serverInfoMap.find(id);
-    return iter == m_serverInfoMap.end() ? NULL : &(iter->second);
+    if(iter != m_serverInfoMap.end())
+    {
+        ret = &(iter->second);
+    }
+    return ret;
 }
 
 unsigned int Server::getServerID() const

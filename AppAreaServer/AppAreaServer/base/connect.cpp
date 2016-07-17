@@ -7,7 +7,7 @@
 
 unsigned long Connect::s_tempid = 0;
 ConnectMessageDispatcher Connect::s_connectMsgDispatcher("连接消息处理器");
-Connect::Connect(const int socket) : m_socket(socket),m_id(++s_tempid),m_status(Task_Status_Close),m_lifeTime(),m_serverID(0),m_serverType(ProtoMsgData::ST_Client),m_heartTime()
+Connect::Connect(const int socket) : m_socket(socket),m_id(++s_tempid),m_status(Task_Status_Close),m_lifeTime(),m_serverID(0),m_verify(false),m_serverType(ProtoMsgData::ST_Client),m_heartTime()
 {
 }
 
@@ -229,18 +229,23 @@ void Connect::resetHeartTime()
 
 bool Connect::sendHeartMsg()
 {
-    if(!m_serverID)
+    bool ret = true;
+    do
     {
-        return true;
-    }
-    if(isHeartElapse())
+        if(isHeartElapse())
+        {
+            ret = false;
+            break;
+        }
+        ProtoMsgData::ReqHeartBeat reqMsg;
+        sendMsg(reqMsg);
+        resetHeartTime();
+    }while(false);
+    if(!ret)
     {
-        return false;
+        setStatus(Task_Status_Recycle);
     }
-    ProtoMsgData::ReqHeartBeat reqMsg;
-    sendMsg(reqMsg);
-    resetHeartTime();
-    return true;
+    return ret;
 }
 
 MsgRet Connect::baseDispatcher(boost::shared_ptr<google::protobuf::Message> message)

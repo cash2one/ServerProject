@@ -167,7 +167,7 @@ bool RecordDataManager::loop()
                 ProtoMsgData::UserBinary binary;
                 binary.ParseFromArray(buffer,size);
                 std::ostringstream oss;
-                oss << "update t_user set `phone` = " << binary.phone() << "," << "`binary` = ";
+                oss << "update t_user set `phone` = '" << binary.phone() << "'," << "`binary` = ";
                 handle->getRealString(buffer,binary.ByteSize(),oss);
                 oss << " where charid = " << charID;
                 if(!handle->execSql(oss.str().c_str(),oss.str().size()))
@@ -204,7 +204,7 @@ bool RecordDataManager::createUser(const std::string &phone,unsigned long &charI
         char buffer[Flyer::msglen];
         binary.SerializeToArray(buffer,sizeof(buffer));
         std::ostringstream oss;
-        oss << "insert into t_user values(" << binary.charid() << "," << binary.phone() << ",";
+        oss << "insert into t_user values(" << binary.charid() << ",'" << binary.phone() << "',";
         handle->getRealString(buffer,binary.ByteSize(),oss);
         oss << ")";
         if(!handle->execSql(oss.str().c_str(),oss.str().size()))

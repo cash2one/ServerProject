@@ -65,6 +65,7 @@ bool TaskManager::sendServerMsg(const unsigned int serverID,const google::protob
     }
     return false;
 }
+
 boost::shared_ptr<Connect> TaskManager::getServerTask(const unsigned int serverID)
 {
     for(auto iter = m_taskMap.begin();iter != m_taskMap.end();++iter)
@@ -77,6 +78,7 @@ boost::shared_ptr<Connect> TaskManager::getServerTask(const unsigned int serverI
     }
     return boost::shared_ptr<Connect>(NULL);
 }
+
 void TaskManager::sendHeartMsg()
 {
     std::vector<unsigned long> delVec;

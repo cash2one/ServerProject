@@ -137,6 +137,7 @@ bool GatewayServer::acceptConnect(const int socket,const int listenFd)
     boost::shared_ptr<GatewayTask> task(new GatewayTask(socket));
     if(TaskManager::getInstance().addTask(task))
     {
+        task->setServerType(ProtoMsgData::ST_Client);
         task->nextStatus();
         ret = VerifyThread::getInstance().add(task);
     }
@@ -148,6 +149,7 @@ bool GatewayServer::acceptConnect(const int socket,const int listenFd)
     }
     return ret;
 }
+
 int main()
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;

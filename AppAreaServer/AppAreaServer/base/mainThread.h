@@ -22,6 +22,7 @@ class MainThread : public Thread,public TaskQueue,public Singleton<MainThread>
         }
     public:
         bool add(boost::shared_ptr<Connect> task);
+        boost::shared_ptr<Connect> getTask(const unsigned long id);
         virtual void run();
 };
 

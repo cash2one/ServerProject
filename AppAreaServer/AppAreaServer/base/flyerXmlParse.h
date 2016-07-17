@@ -24,7 +24,7 @@ namespace Flyer
             Flyer::FlyerValue nodeTextValue(const xmlNode *node) const;
     };
     //加载配置文件的节点
-    bool loadXmlConf(const char *fileName,const char *nodeName = "global");
+    bool loadXmlConf(const char *fileName,const char *nodeName = NULL);
 }
 
 #endif

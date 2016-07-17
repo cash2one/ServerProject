@@ -35,7 +35,7 @@ bool RecordTask::verify(const ProtoMsgData::ServerInfo &serverInfo)
         }
         m_serverID = serverInfo.id();
         m_serverType = serverInfo.servertype();
-        nextStatus();
+        setVerify(true);
         ret = true;
     }while(false);
     return ret;
@@ -54,7 +54,7 @@ bool RecordTask::createUser(boost::shared_ptr<ProtoMsgData::ReqCreateUser> messa
         ret = true;
     }while(false);
     ProtoMsgData::AckCreateUser ackMsg;
-    ackMsg.set_code(ProtoMsgData::EC_Default);
+    ackMsg.set_code(ret ? ProtoMsgData::EC_Default : ProtoMsgData::EC_Create_Role);
     ackMsg.set_phone(message->phone());
     ackMsg.set_charid(charID);
     ackMsg.set_id(message->id());

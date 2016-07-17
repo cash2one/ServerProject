@@ -31,8 +31,13 @@ bool ClientManager::add(boost::shared_ptr<Client> client)
 
 boost::shared_ptr<Client> ClientManager::getClient(const unsigned long id)
 {
+    boost::shared_ptr<Client> ret(NULL);
     auto iter = m_clientMap.find(id);
-    return iter == m_clientMap.end() ? boost::shared_ptr<Client> (NULL) : iter->second;
+    if(iter != m_clientMap.end())
+    {
+        ret = iter->second;
+    }
+    return ret;
 }
 
 int ClientManager::checkStatus(const unsigned int num,const ProtoMsgData::ServerType &serverType)
@@ -102,28 +107,24 @@ void ClientManager::run()
                     if(event.events & EPOLLIN)
                     {
                         client->accpetMsg();
-                        delFlg = false;
                     }
                     if(event.events & EPOLLOUT)
                     {
-                        delFlg = false;
                     }
-                    if(client->getStatus() == Task_Status_Recycle)
-                    {
-                        delFlg = true;
-                    }
+                    delFlg = client->getStatus() == Task_Status_Recycle ? true : false;
                 }while(false);
-                event.events = 0;
                 if(delFlg)
                 {
                     delVec.push_back(event.data.u64);
                 }
+                event.events = 0;
             }
             for(auto iter = delVec.begin();iter != delVec.end();++iter)
             {
                 boost::shared_ptr<Client> client = getClient(*iter);
                 if(client)
                 {
+                    client->setStatus(Task_Status_Recycle);
                     client->delEpoll(m_epfd,EPOLLIN);
                     RecycleThread::getInstance().add(client);
                 }
@@ -139,6 +140,7 @@ void ClientManager::run()
         boost::shared_ptr<Client> client = iter->second;
         if(client)
         {
+            client->setStatus(Task_Status_Recycle);
             client->delEpoll(m_epfd,EPOLLIN);
             RecycleThread::getInstance().add(client);
         }

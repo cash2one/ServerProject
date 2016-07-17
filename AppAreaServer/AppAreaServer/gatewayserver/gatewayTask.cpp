@@ -143,13 +143,9 @@ bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> 
         sendMsg(ackMsg);
         loginScene();
     }
-    if(ret)
-    {
-        nextStatus();
-    }
-    char temp[100] = {0};
-    snprintf(temp,sizeof(temp),"[登录网关%s] (%s,%s,%lu,%u)",ret ? "成功" : "失败",message->phone().c_str(),message->passwd().c_str(),m_charID,code);
-    Debug(Flyer::logger,temp);
+    std::ostringstream oss;
+    oss << "[登录网关" << (ret ? "成功" : "失败") << "] (" << message->phone() << "," << message->passwd() << "," << m_charID << "," << code << ")"; 
+    Debug(Flyer::logger,oss.str().c_str());
     return ret;
 }
 
@@ -213,9 +209,13 @@ bool GatewayTask::loginScene()
         ret = true;
     }while(false);
 
-    char temp[100] = {0};
-    snprintf(temp,sizeof(temp),"[登录网关(请求登录场景)] (%s,%lu,%u)",ret ? "成功" : "失败",m_charID,m_sceneID);
-    Debug(Flyer::logger,temp);
+    std::ostringstream oss;
+    oss << "[登录网关(请求登录场景)] (" << (ret ? "成功" : "失败") << "," << m_charID << "," << m_sceneID << ")";
+    Debug(Flyer::logger,oss.str().c_str());
+    if(ret)
+    {
+        setVerify(true);
+    }
     return ret;
 }
 
@@ -258,9 +258,9 @@ bool GatewayTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> m
     {
         loginScene();
     }
-    char temp[100] = {0};
-    snprintf(temp,sizeof(temp),"[登录网关(新建角色返回)] (%s,%s,%lu,%u)",ret ? "成功" : "失败",message->phone().c_str(),message->charid(),message->code());
-    Debug(Flyer::logger,temp);
+    std::ostringstream oss;
+    oss << "[登录网关(新建角色返回)] (" << (ret ? "成功" : "失败") << "," << message->phone() << "," << message->charid() << "," << message->code() << ")";
+    Debug(Flyer::logger,oss.str().c_str());
     return ret;
 }
 

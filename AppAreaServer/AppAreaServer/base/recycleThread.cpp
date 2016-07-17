@@ -1,6 +1,7 @@
 #include "recycleThread.h"
 #include "flyer.h"
 #include "taskManager.h"
+#include "client.h"
 
 bool RecycleThread::add(boost::shared_ptr<Connect> task)
 {
@@ -18,8 +19,15 @@ void RecycleThread::run()
             for(auto iter = m_taskSet.begin();iter != m_taskSet.end();++iter)
             {
                 boost::shared_ptr<Connect> task = iter->second;
-                task->closeFd();
-                TaskManager::getInstance().eraseTask(task->getID());
+                if(task)
+                {
+                    boost::shared_ptr<Client> client = boost::dynamic_pointer_cast<Client>(task);
+                    if(!client)
+                    {
+                        TaskManager::getInstance().eraseTask(task->getID());
+                    }
+                    task->closeFd();
+                }
             }
             m_taskSet.clear();
         }
@@ -28,8 +36,11 @@ void RecycleThread::run()
     for(auto iter = m_taskSet.begin();iter != m_taskSet.end();++iter)
     {
         boost::shared_ptr<Connect> task = iter->second;
-        task->closeFd();
-        TaskManager::getInstance().eraseTask(task->getID());
+        if(task)
+        {
+            task->closeFd();
+            TaskManager::getInstance().eraseTask(task->getID());
+        }
     }
     m_taskSet.clear();
 }

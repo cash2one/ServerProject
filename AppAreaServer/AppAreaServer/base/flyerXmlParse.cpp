@@ -141,7 +141,7 @@ namespace Flyer
             ptree tree;
             read_xml(fileName,tree);
             std::string treeNode = "Flyer.";
-            treeNode += nodeName;
+            treeNode += "global";
             ptree child = tree.get_child(treeNode.c_str());
             for(auto iter = child.begin();iter != child.end();++iter)
             {
@@ -149,6 +149,21 @@ namespace Flyer
                 if(iter->first != "<xmlcomment>")
                 {
                     Flyer::globalConfMap[iter->first] = iter->second.data();
+                }
+            }
+            if(nodeName)
+            {
+                treeNode.clear();
+                treeNode = "Flyer.";
+                treeNode += nodeName;
+                ptree child = tree.get_child(treeNode.c_str());
+                for(auto iter = child.begin();iter != child.end();++iter)
+                {
+                    //去掉注释
+                    if(iter->first != "<xmlcomment>")
+                    {
+                        Flyer::globalConfMap[iter->first] = iter->second.data();
+                    }
                 }
             }
             ret = true;

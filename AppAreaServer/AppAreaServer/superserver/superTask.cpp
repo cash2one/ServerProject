@@ -132,9 +132,9 @@ bool SuperTask::verifyIp(const ProtoMsgData::ServerType &serverType)
         {
             break;
         }
-        char temp[100] = {0};
-        snprintf(temp,sizeof(temp),"select id,ip,port from t_serverinfo where servertype = %u",serverType);
-        if(!handle->select(temp,strlen(temp),ipVec))
+        std::ostringstream oss;
+        oss << "select id,ip,port from t_serverinfo where servertype = " << serverType;
+        if(!handle->select(oss.str().c_str(),oss.str().size(),ipVec))
         {
             break;
         }
@@ -169,53 +169,69 @@ bool SuperTask::verifyIp(const ProtoMsgData::ServerType &serverType)
 
 bool SuperTask::notifyMe()
 {
-    if(!m_notifyFlg)
+    bool ret = false;
+    do
     {
-        return false;
-    }
-    ProtoMsgData::AckNotifyMe ackMsg;
-    for(auto iter = m_dependMap.begin();iter != m_dependMap.end();++iter)
-    {
-        if(!iter->second)
+        if(!m_notifyFlg)
         {
-            return false;
+            break;
         }
-    }
-    //自己的数据
-    ProtoMsgData::ServerInfo* selfInfo = SuperServer::getInstance().getServer(m_serverID);
-    if(!selfInfo)
-    {
-        return false;
-    }
-    selfInfo->set_status(ProtoMsgData::ST_Start);
-    ProtoMsgData::ServerInfo *temp = ackMsg.add_serverinfo();
-    if(temp)
-    {
-        *temp = *selfInfo;
-    }
-
-    //别的数据
-    for(auto iter = m_dependMap.begin();iter != m_dependMap.end();++iter)
-    {
-        if(!iter->second)
+        bool flag = true; 
+        ProtoMsgData::AckNotifyMe ackMsg;
+        for(auto iter = m_dependMap.begin();iter != m_dependMap.end();++iter)
         {
-            return false;
+            if(!iter->second)
+            {
+                flag = false;
+                break;
+            }
         }
-        ProtoMsgData::ServerInfo *info = SuperServer::getInstance().getServer(iter->first);
-        if(!info)
+        if(!flag)
         {
-            return false;
+            break;
         }
+        //自己的数据
+        ProtoMsgData::ServerInfo* selfInfo = SuperServer::getInstance().getServer(m_serverID);
+        if(!selfInfo)
+        {
+            break;
+        }
+        selfInfo->set_status(ProtoMsgData::ST_Start);
         ProtoMsgData::ServerInfo *temp = ackMsg.add_serverinfo();
         if(temp)
         {
-            *temp = *info;
+            *temp = *selfInfo;
         }
-    }
-    nextStatus();
-    sendMsg(ackMsg);
-    SuperServer::getInstance().verifyOtherNotify(temp->servertype());
-    return true;
+
+        //别的数据
+        for(auto iter = m_dependMap.begin();iter != m_dependMap.end();++iter)
+        {
+            if(!iter->second)
+            {
+                flag = false;
+                break;
+            }
+            ProtoMsgData::ServerInfo *info = SuperServer::getInstance().getServer(iter->first);
+            if(!info)
+            {
+                flag = false;
+                break;
+            }
+            ProtoMsgData::ServerInfo *temp = ackMsg.add_serverinfo();
+            if(temp)
+            {
+                *temp = *info;
+            }
+        }
+        ret = flag ? true : false;
+        if(ret)
+        {
+            sendMsg(ackMsg);
+            SuperServer::getInstance().verifyOtherNotify(temp->servertype());
+            setVerify(true);
+        }
+    }while(false);
+    return ret;
 }
 
 bool SuperTask::verify(const ProtoMsgData::ServerType &serverType)

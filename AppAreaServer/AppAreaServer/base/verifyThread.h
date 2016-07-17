@@ -21,6 +21,7 @@ class VerifyThread : public Thread,public TaskQueue,public Singleton<VerifyThrea
             TEMP_FAILURE_RETRY(::close(m_epfd));
         }
     public:
+        boost::shared_ptr<Connect> getTask(const unsigned long taskID);
         bool add(boost::shared_ptr<Connect> task);
         virtual void run();
 };

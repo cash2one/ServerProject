@@ -27,6 +27,7 @@ class Connect : private DisCopy , public boost::enable_shared_from_this<Connect>
         TaskStatus m_status;
         TimeTv m_lifeTime; 
         unsigned int m_serverID;
+        bool m_verify;
         ProtoMsgData::ServerType m_serverType;
         TimeTv m_heartTime;
         //接收消息缓冲队列
@@ -51,6 +52,14 @@ class Connect : private DisCopy , public boost::enable_shared_from_this<Connect>
         virtual void disConnect()
         {
             return;
+        }
+        inline bool getVerify() const
+        {
+            return m_verify;
+        }
+        inline void setVerify(const bool verify)
+        {
+            m_verify = verify;
         }
         inline unsigned long getID() const
         {
