@@ -38,7 +38,7 @@ bool SceneTask::verify(const ProtoMsgData::ServerInfo &serverInfo)
         }
         m_serverID = serverInfo.id();
         m_serverType = serverInfo.servertype();
-        nextStatus();
+        setVerify(true);
         ret = true;
     }while(false);
     return ret;

@@ -86,6 +86,10 @@ start()
         fi
     done
 
+    #启动机器人服务器
+    #echo "start ./robotserver/RobotServer"
+    #./robotserver/RobotServer -d
+
     cond=$(ps -u $(basename $HOME) | grep Server)
     echo "$cond"
 }
@@ -124,6 +128,10 @@ stop()
     sleep 1
     echo "stop ./loginserver/LoginServer"
 	pkill LoginServer 
+
+    #暂停机器人服务器
+    echo "stop ./robotserver/RobotServer"
+    pkill RobotServer
 
 
     #暂停redis服务器

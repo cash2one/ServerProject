@@ -37,12 +37,19 @@
         <!--redis配置文件-->
         <redisxml>configdir/xmlConfig/redisConfig.xml</redisxml>
     </global>
+    <login>
+    </login>
+    <super>
+    </super>
+    <record>
+    </record>
+    <scene>
+    </scene>
+    <gateway>
+    </gateway>
     <robot>
-        <!--机器人服务器IP和端口-->
-        <robotip>121.40.77.217</robotip>
-        <robotport>11000</robotport>
         <!--登陆服务器IP和端口-->
         <loginip>121.40.77.217</loginip>
-        <loginport>10000</loginport>
+        <loginport>10010</loginport>
     </robot>
 </Flyer>
