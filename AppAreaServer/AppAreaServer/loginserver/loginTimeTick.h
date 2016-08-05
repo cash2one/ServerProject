@@ -10,6 +10,7 @@ class LoginTimeTick : public Thread , public Singleton<LoginTimeTick>
         LoginTimeTick();
         ~LoginTimeTick() {};
         friend class Singleton<LoginTimeTick>;
+        void testHttp(const std::string userName);
     public:
         static Time s_time;
         virtual void run();

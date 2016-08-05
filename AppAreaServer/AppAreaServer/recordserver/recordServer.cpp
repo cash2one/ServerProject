@@ -10,6 +10,13 @@
 #include "verifyThread.h"
 #include "recordDataManager.h"
 
+static void ctrlHandler(int signal)
+{
+    Info(Flyer::logger,"[档案服务器] 终止");
+    RecordServer &ref = RecordServer::getInstance();
+    ref.setTerminate();
+}
+
 RecordServer::RecordServer() : Server("档案服务器",ProtoMsgData::ST_Record)
 {
 }
@@ -23,6 +30,19 @@ bool RecordServer::init()
     bool ret = false;
     do
     {
+        struct sigaction sig;
+        sig.sa_handler = ctrlHandler;
+        sig.sa_flags = 0;
+        sigemptyset(&sig.sa_mask);
+        sigaction(SIGINT,&sig,NULL);
+
+#if 0
+        sigaction(SIGQUIT,&sig,NULL);
+        sigaction(SIGABRT,&sig,NULL);
+        sigaction(SIGTERM,&sig,NULL);
+        sigaction(SIGHUP,&sig,NULL);
+#endif
+
         if(!Server::init())
         {
             break;
@@ -130,5 +150,6 @@ int main()
         RecordServer::getInstance().main();
     }
     google::protobuf::ShutdownProtobufLibrary();
+    Flyer::destory();
     return 0;
 }

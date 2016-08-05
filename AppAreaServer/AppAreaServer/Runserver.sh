@@ -37,7 +37,7 @@ start()
         then
             echo "start ./loginserver/LoginServer"
             ./loginserver/LoginServer -d
-            sleep 1
+            sleep 5
         fi
     done
 

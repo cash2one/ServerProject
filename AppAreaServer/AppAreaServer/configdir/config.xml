@@ -36,6 +36,10 @@
         <hearttime>100</hearttime>
         <!--redis配置文件-->
         <redisxml>configdir/xmlConfig/redisConfig.xml</redisxml>
+        <!--http 超时秒数-->
+        <httptimeout>30</httptimeout>
+        <!--测试url-->
+        <url>http://121.40.77.217:8081/StudentSystem/register</url>
     </global>
     <login>
     </login>

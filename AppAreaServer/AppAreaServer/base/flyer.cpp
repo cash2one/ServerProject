@@ -12,6 +12,20 @@ namespace Flyer
         seed = 0;
         globalConfMap.clear();
     }
+    void destory()
+    {
+        log4cxx::Appender* appender = logger->getAppender("file");
+        if(appender)
+        {
+            logger->removeAppender(appender);
+            appender->close();
+        }
+
+#if 0
+        delete logger;
+#endif
+        globalConfMap.clear();
+    }
     void setLogger(const std::string &fileName)
     {
         //先删除

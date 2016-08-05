@@ -11,7 +11,7 @@ void* Thread::process(void *arg)
     Thread *thread = (Thread*)arg;
     pthread_mutex_lock(&thread->m_mutex);
     thread->m_alive = true;
-    pthread_cond_broadcast(&thread->m_cond);
+    //pthread_cond_broadcast(&thread->m_cond);
     pthread_mutex_unlock(&thread->m_mutex);
 
     pthread_mutex_lock(&thread->m_mutex);
@@ -20,17 +20,19 @@ void* Thread::process(void *arg)
 
     pthread_mutex_lock(&thread->m_mutex);
     thread->m_alive = false;
-    pthread_cond_broadcast(&thread->m_cond);
+    //pthread_cond_broadcast(&thread->m_cond);
     pthread_mutex_unlock(&thread->m_mutex);
 
     if(!thread->join())
     {
+#if 0
         pthread_mutex_lock(&thread->m_mutex);
         while(thread->m_alive)
         {
             pthread_cond_wait(&thread->m_cond,&thread->m_mutex);
         }
         pthread_mutex_unlock(&thread->m_mutex);
+#endif
     }
 
     pthread_exit(NULL);
@@ -86,11 +88,13 @@ void Thread::end()
     {
         ::pthread_join(m_id,NULL);
         m_id = 0;
+#if 0
         pthread_mutex_lock(&m_mutex);
         while(m_alive)
         {
             pthread_cond_wait(&m_cond,&m_mutex);
         }
         pthread_mutex_unlock(&m_mutex);
+#endif
     }
 }

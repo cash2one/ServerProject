@@ -12,7 +12,14 @@
 #include "excelBase.h"
 #include "redisMemManager.h"
 #include "loginHandle.h"
+#include "httpThread.h"
 
+static void ctrlHandler(int signal)
+{
+    Info(Flyer::logger,"[登陆服务器] 终止");
+    LoginServer &ref = LoginServer::getInstance();
+    ref.setTerminate();
+}
 LoginServer::LoginServer() :Server("登陆服务器",ProtoMsgData::ST_Login)
 {
 }
@@ -26,6 +33,18 @@ bool LoginServer::init()
     bool ret = false;
     do
     {
+        struct sigaction sig;
+        sig.sa_handler = ctrlHandler;
+        sig.sa_flags = 0;
+        sigemptyset(&sig.sa_mask);
+        sigaction(SIGINT,&sig,NULL);
+#if 0
+        sigaction(SIGQUIT,&sig,NULL);
+        sigaction(SIGABRT,&sig,NULL);
+        sigaction(SIGTERM,&sig,NULL);
+        sigaction(SIGHUP,&sig,NULL);
+#endif
+
         if(!Server::init())
         {
             break;
@@ -170,6 +189,7 @@ void LoginServer::endServerThread()
 void LoginServer::startServerThread()
 {
     LoginTimeTick::getInstance().start();
+    HttpThread::getInstance().start();
 }
 
 bool LoginServer::loadAccount()
@@ -223,6 +243,7 @@ int main()
         Info(Flyer::logger,"[登陆服务器] 启动成功");
         LoginServer::getInstance().main();
     }
+    Flyer::destory();
     return 0;
 }
 

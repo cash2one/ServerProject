@@ -16,6 +16,13 @@
 #include "gatewayTask.h"
 #include "gatewayHandle.h"
 
+static void ctrlHandler(int signal)
+{
+    Info(Flyer::logger,"[网关服务器] 终止");
+    GatewayServer &ref = GatewayServer::getInstance();
+    ref.setTerminate();
+}
+
 GatewayServer::GatewayServer() : Server("网关服务器",ProtoMsgData::ST_Gateway)
 {
 }
@@ -29,6 +36,19 @@ bool GatewayServer::init()
     bool ret = false;
     do
     {
+        struct sigaction sig;
+        sig.sa_handler = ctrlHandler;
+        sig.sa_flags = 0;
+        sigemptyset(&sig.sa_mask);
+        sigaction(SIGINT,&sig,NULL);
+
+#if 0
+        sigaction(SIGQUIT,&sig,NULL);
+        sigaction(SIGABRT,&sig,NULL);
+        sigaction(SIGTERM,&sig,NULL);
+        sigaction(SIGHUP,&sig,NULL);
+#endif
+
         if(!Server::init())
         {
             break;
@@ -163,5 +183,6 @@ int main()
         GatewayServer::getInstance().main();
     }
     google::protobuf::ShutdownProtobufLibrary();
+    Flyer::destory();
     return 0;
 }

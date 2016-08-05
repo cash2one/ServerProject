@@ -6,6 +6,7 @@
 #include "mysqlPool.h"
 #include "clientManager.h"
 #include "superClient.h"
+#include <signal.h>
 
 class Server
 {
@@ -28,10 +29,15 @@ class Server
         unsigned short m_outPort;
         int m_outFd;
         boost::shared_ptr<SuperClient> m_superClient;
+        bool m_terminate;
     private:
         int accept(std::map<int,int> &socketMap);
         std::string getNodeName();
     public:
+        inline void setTerminate()
+        {
+            m_terminate = true;
+        }
         bool init();
         void serverCallBack();
         bool listenPort();

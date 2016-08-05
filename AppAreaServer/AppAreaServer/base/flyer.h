@@ -14,6 +14,8 @@ namespace Flyer
     extern std::map<std::string,std::string> globalConfMap;
     //初始化全局变量
     void init();
+    //销毁
+    void destory();
     //设置logger属性
     void setLogger(const std::string &fileName);
     //产生随机数

@@ -15,6 +15,13 @@
 #include "loginHandle.h"
 #include "excelBase.h"
 
+static void ctrlHandler(int signal)
+{
+    Info(Flyer::logger,"[管理服务器] 终止");
+    SuperServer &ref = SuperServer::getInstance();
+    ref.setTerminate();
+}
+
 SuperServer::SuperServer() :Server("管理服务器",ProtoMsgData::ST_Super)
 {
 }
@@ -28,6 +35,19 @@ bool SuperServer::init()
     bool ret = false;
     do
     {
+        struct sigaction sig;
+        sig.sa_handler = ctrlHandler;
+        sig.sa_flags = 0;
+        sigemptyset(&sig.sa_mask);
+        sigaction(SIGINT,&sig,NULL);
+
+#if 0
+        sigaction(SIGQUIT,&sig,NULL);
+        sigaction(SIGABRT,&sig,NULL);
+        sigaction(SIGTERM,&sig,NULL);
+        sigaction(SIGHUP,&sig,NULL);
+#endif
+
         if(!Server::init())
         {
             break;
@@ -207,6 +227,7 @@ int main()
         Info(Flyer::logger,"[管理服务器] 启动成功");
         SuperServer::getInstance().main();
     }
+    Flyer::destory();
     return 0;
 }
 

@@ -13,6 +13,13 @@
 #include "sceneHandle.h"
 #include "redisMemManager.h"
 
+static void ctrlHandler(int signal)
+{
+    Info(Flyer::logger,"[场景服务器] 终止");
+    SceneServer &ref = SceneServer::getInstance();
+    ref.setTerminate();
+}
+
 SceneServer::SceneServer() : Server("场景服务器",ProtoMsgData::ST_Scene)
 {
 }
@@ -26,6 +33,19 @@ bool SceneServer::init()
     bool ret = false;
     do
     {
+        struct sigaction sig;
+        sig.sa_handler = ctrlHandler;
+        sig.sa_flags = 0;
+        sigemptyset(&sig.sa_mask);
+        sigaction(SIGINT,&sig,NULL);
+
+#if 0
+        sigaction(SIGQUIT,&sig,NULL);
+        sigaction(SIGABRT,&sig,NULL);
+        sigaction(SIGTERM,&sig,NULL);
+        sigaction(SIGHUP,&sig,NULL);
+#endif
+
         if(!Server::init())
         {
             break;
@@ -156,6 +176,7 @@ int main()
         Info(Flyer::logger,"[场景服务器] 启动成功");
         SceneServer::getInstance().main();
     }
+    Flyer::destory();
     google::protobuf::ShutdownProtobufLibrary();
     return 0;
 }

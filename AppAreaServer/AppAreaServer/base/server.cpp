@@ -14,7 +14,7 @@
 #include "redisMemManager.h"
 #include "connectHandle.h"
 
-Server::Server(const std::string &name,const ProtoMsgData::ServerType &type) : m_name(name),m_type(type),m_id(0),m_port(0),m_fd(-1),m_epfd(-1),m_verify(false),m_outIp(),m_outPort(0),m_outFd(-1),m_superClient(NULL)
+Server::Server(const std::string &name,const ProtoMsgData::ServerType &type) : m_name(name),m_type(type),m_id(0),m_port(0),m_fd(-1),m_epfd(-1),m_verify(false),m_outIp(),m_outPort(0),m_outFd(-1),m_superClient(NULL),m_terminate(false)
 {
     m_epfd = epoll_create(10);
 }
@@ -218,7 +218,7 @@ void Server::serverCallBack()
 
 void Server::main()
 {
-    while(true)
+    while(!m_terminate)
     {
         serverCallBack();
     }
