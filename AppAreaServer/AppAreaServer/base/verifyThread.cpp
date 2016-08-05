@@ -6,7 +6,6 @@
 
 bool VerifyThread::add(boost::shared_ptr<Connect> task)
 {
-    task->addEpoll(m_epfd,EPOLLIN | EPOLLOUT | EPOLLPRI | EPOLLERR);
     std::pair<std::map<unsigned long,boost::shared_ptr<Connect> >::iterator,bool> ret = m_taskSet.insert(std::pair<unsigned long,boost::shared_ptr<Connect> >(task->getID(),task));
     if(ret.second)
     {
@@ -96,7 +95,10 @@ void VerifyThread::run()
                     task->delEpoll(m_epfd,EPOLLIN);
                     m_taskSet.erase(task->getID());
                     task->resetLifeTime();
-                    MainThread::getInstance().add(task);
+                    if(!MainThread::getInstance().add(task))
+                    {
+                        delVec.push_back(iter->first);
+                    }
                 }
             }
             for(auto iter = delVec.begin();iter != delVec.end();++iter)

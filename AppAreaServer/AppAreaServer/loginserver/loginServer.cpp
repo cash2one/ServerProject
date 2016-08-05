@@ -83,7 +83,7 @@ bool LoginServer::acceptConnect(const int socket,const int listenPort)
                 task->nextStatus();
                 ret = VerifyThread::getInstance().add(task);
             }
-            else
+            if(!ret)
             {
                 TaskManager::getInstance().eraseTask(task->getID());
                 task->setStatus(Task_Status_Recycle);
@@ -99,7 +99,7 @@ bool LoginServer::acceptConnect(const int socket,const int listenPort)
                 task->nextStatus();
                 ret = VerifyThread::getInstance().add(task);
             }
-            else
+            if(!ret)
             {
                 TaskManager::getInstance().eraseTask(task->getID());
                 task->setStatus(Task_Status_Recycle);
