@@ -6,7 +6,7 @@
 #include "redisMemManager.h"
 
 LoginMessageDispatcher LoginTask::s_loginMsgDispatcher("登陆服务器消息处理器");
-LoginTask::LoginTask(const int fd) : Connect(fd)
+LoginTask::LoginTask(const int fd) : Task(fd)
 {
 }
 

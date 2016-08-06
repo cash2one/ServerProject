@@ -38,7 +38,8 @@ src = thread.cpp\
 	  redisMemManager.cpp\
 	  connectHandle.cpp\
 	  httpClient.cpp\
-	  httpThread.cpp
+	  httpThread.cpp\
+	  task.cpp
 		
 
 object = $(patsubst %.cpp,%.o,$(src))

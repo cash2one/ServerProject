@@ -101,8 +101,7 @@ void ClientManager::run()
                         break;
                     }
                     if(event.events & EPOLLERR)
-                    {
-                        break;
+                    { break;
                     }
                     if(event.events & EPOLLIN)
                     {
