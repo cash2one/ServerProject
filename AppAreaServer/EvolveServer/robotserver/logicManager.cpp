@@ -7,6 +7,7 @@
 #include <sstream>
 #include "redisMemManager.h"
 #include "excelManager.h"
+#include "clientThread.h"
 
 void LogicManager::notice()
 {
@@ -151,6 +152,10 @@ bool LogicManager::reqRegister(const std::map<std::string,std::string>& cmdMap,c
                 }
                 boost::shared_ptr<RobotClient> client(new RobotClient("客户端",loginIp,loginPort,fd));
                 if(!ClientManager::getInstance().add(client))
+                {
+                    break;
+                }
+                if(!ClientThread::getInstance().add(client->getID()))
                 {
                     break;
                 }

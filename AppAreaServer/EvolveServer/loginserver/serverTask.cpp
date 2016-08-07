@@ -6,7 +6,7 @@
 
 ServerMessageDispatcher ServerTask::s_serverMsgDispatcher("登陆服务器消息处理器");
 
-ServerTask::ServerTask(const int fd) : Connect(fd)
+ServerTask::ServerTask(const int fd) : Task(fd)
 {
 }
 
@@ -23,15 +23,15 @@ MsgRet ServerTask::dispatcher(boost::shared_ptr<google::protobuf::Message> messa
 bool ServerTask::verify(const ProtoMsgData::ServerInfo &serverInfo)
 {
     bool ret = false;
+    boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
+    if(!handle)
+    {
+        return ret;
+    }
     std::vector<std::map<std::string,Flyer::FlyerValue> > ipVec;
     do
     {
-        boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
-        if(!handle)
-        {
-            break;
-        }
-        if(LoginServer::getInstance().findServer(serverInfo.id()))
+        if(TaskManager::getInstance().getServerTask(serverInfo.id()))
         {
             break;
         }
@@ -57,14 +57,14 @@ bool ServerTask::verify(const ProtoMsgData::ServerInfo &serverInfo)
             {
                 continue;
             }
-            ProtoMsgData::ServerInfo tempInfo = serverInfo;
-            tempInfo.set_id(id);
-            LoginServer::getInstance().addServer(tempInfo);
+            m_serverID = id;
+            m_serverType = ProtoMsgData::ST_Super;
             setVerify(true);
             ret = true;
             break;
         }
     }while(false);
+    handle->resetStatus();
     return ret;
 }
 

@@ -1,12 +1,12 @@
 #ifndef SERVER_TASK_H
 #define SERVER_TASK_H
-#include "connect.h"
+#include "task.h"
 #include "messageDispatcher.h"
 #include "system.pb.h"
 
 class ServerTask;
 typedef MessageDispatcher<boost::shared_ptr<ServerTask> > ServerMessageDispatcher;
-class ServerTask : public Connect
+class ServerTask : public Task 
 {
     public:
         ServerTask(const int fd);

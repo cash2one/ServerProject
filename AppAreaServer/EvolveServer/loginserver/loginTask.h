@@ -1,12 +1,12 @@
 #ifndef LOGIN_TASK_H
 #define LOGIN_TASK_H
-#include "connect.h"
+#include "task.h"
 #include "messageDispatcher.h"
 #include "login.pb.h"
 
 class LoginTask;
 typedef MessageDispatcher<boost::shared_ptr<LoginTask> > LoginMessageDispatcher;
-class LoginTask : public Connect
+class LoginTask : public Task 
 {
     public:
         LoginTask(const int fd);

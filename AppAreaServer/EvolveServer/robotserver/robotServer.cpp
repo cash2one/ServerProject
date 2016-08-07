@@ -95,7 +95,7 @@ int main()
     if(RobotServer::getInstance().init())
     {
         Info(Flyer::logger,"[机器人服务器] 启动成功");
-        std::string cmd = "cmd=ReqRegister,phone=333,num=5000";
+        std::string cmd = "cmd=ReqRegister,phone=000,num=1000";
         LogicManager::getInstance().add(cmd);
         LogicManager::getInstance().waitCmd();
     }

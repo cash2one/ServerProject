@@ -1,5 +1,6 @@
 #include "robotClient.h"
 #include "clientManager.h"
+#include "clientThread.h"
 
 RobotClientMessageDispatcher RobotClient::s_robotClientMsgDispatcher("机器人消息处理器");
 RobotClient::RobotClient(const std::string &name,const std::string &ip,const unsigned short port,const int fd) : Client(name,ip,port,fd),m_phone()
@@ -35,18 +36,21 @@ bool RobotClient::reqLoginGateway(const std::string &ip,const unsigned int port)
         {
             break;
         }
-        boost::shared_ptr<RobotClient> client(new RobotClient("客户端",ip,port,fd));
+        boost::shared_ptr<RobotClient> client(new RobotClient("机器人",ip,port,fd));
         if(!ClientManager::getInstance().add(client))
         {
             break;
         }
-
+        if(!ClientThread::getInstance().add(client->getID()))
+        {
+            break;
+        }
         ProtoMsgData::ReqLoginGateway cmd;
         client->setPhone(m_phone);
         cmd.set_phone(m_phone);
         cmd.set_passwd(m_phone);
         ret = client->sendMsg(cmd);
-        setStatus(Task_Status_Recycle);
+        ClientThread::getInstance().addRecycle(getID());
     }while(false);
     return ret; 
 }

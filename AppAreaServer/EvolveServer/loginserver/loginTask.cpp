@@ -4,9 +4,10 @@
 #include "common.pb.h"
 #include "taskManager.h"
 #include "redisMemManager.h"
+#include "mainThread.h"
 
 LoginMessageDispatcher LoginTask::s_loginMsgDispatcher("登陆服务器消息处理器");
-LoginTask::LoginTask(const int fd) : Connect(fd)
+LoginTask::LoginTask(const int fd) : Task(fd)
 {
 }
 
@@ -16,13 +17,24 @@ LoginTask::~LoginTask()
 
 MsgRet LoginTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<LoginTask> task = boost::dynamic_pointer_cast<LoginTask>(getPtr());
-    return s_loginMsgDispatcher.dispatch(task,message);
+    MsgRet ret = MR_False;
+    ret = Task::dispatcher(message);
+    if(ret == MR_No_Register)
+    {
+        boost::shared_ptr<LoginTask> task = boost::dynamic_pointer_cast<LoginTask>(getPtr());
+        ret = s_loginMsgDispatcher.dispatch(task,message);
+    }
+    return ret;
 }
 
 bool LoginTask::registerAccount(boost::shared_ptr<ProtoMsgData::ReqRegister> message)
 {
     bool ret = false;
+    boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
+    if(!handle)
+    {
+        return ret;
+    }
     ProtoMsgData::ErrorCode code = ProtoMsgData::EC_Default;
     do
     {
@@ -39,7 +51,6 @@ bool LoginTask::registerAccount(boost::shared_ptr<ProtoMsgData::ReqRegister> mes
         }
         std::ostringstream oss;
         oss << "insert into t_register(phone,passwd,regtime) values" << "('" << message->phone() << "'," << "'" << message->passwd() << "',current_timestamp)"; 
-        boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
         if(!handle->execSql(oss.str().c_str(),oss.str().size()))
         {
             break;
@@ -52,6 +63,7 @@ bool LoginTask::registerAccount(boost::shared_ptr<ProtoMsgData::ReqRegister> mes
         Info(Flyer::logger,"[注册取回](" << getKey << ")");
         ret = true;
     }while(false);
+    handle->resetStatus();
     if(code != ProtoMsgData::EC_Default)
     {
         ProtoMsgData::AckErrorCode ackMsg;
@@ -148,6 +160,6 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
     std::ostringstream oss;
     oss << "[请求网关" << (ret ? "成功" : "失败") << "] (" << message->phone() << "," << message->passwd() << "," << ackMsg.ip() << "," << ackMsg.port() << "," << code << ")"; 
     Debug(Flyer::logger,oss.str().c_str());
-    setStatus(Task_Status_Recycle);
+    MainThread::getInstance().addRecycle(m_id);
     return ret;
 }

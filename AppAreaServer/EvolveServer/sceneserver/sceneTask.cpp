@@ -10,7 +10,7 @@
 
 SceneMessageDispatcher SceneTask::s_sceneMsgDispatcher("场景服务器消息处理器");
 
-SceneTask::SceneTask(const int fd) : Connect(fd)
+SceneTask::SceneTask(const int fd) : Task(fd)
 {
 }
 
@@ -20,8 +20,14 @@ SceneTask::~SceneTask()
 
 MsgRet SceneTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<SceneTask> task = boost::dynamic_pointer_cast<SceneTask>(getPtr());
-    return s_sceneMsgDispatcher.dispatch(task,message);
+    MsgRet ret = MR_False;
+    ret = Task::dispatcher(message);
+    if(ret == MR_No_Register)
+    {
+        boost::shared_ptr<SceneTask> task = boost::dynamic_pointer_cast<SceneTask>(getPtr());
+        ret = s_sceneMsgDispatcher.dispatch(task,message);
+    }
+    return ret;
 }
 
 bool SceneTask::verify(const ProtoMsgData::ServerInfo &serverInfo)

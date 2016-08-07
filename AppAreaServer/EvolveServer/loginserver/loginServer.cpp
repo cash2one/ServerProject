@@ -80,14 +80,11 @@ bool LoginServer::acceptConnect(const int socket,const int listenPort)
             boost::shared_ptr<ServerTask> task(new ServerTask(socket));
             if(TaskManager::getInstance().addTask(task))
             {
-                task->nextStatus();
-                ret = VerifyThread::getInstance().add(task);
+                ret = VerifyThread::getInstance().add(task->getID());
             }
             if(!ret)
             {
-                TaskManager::getInstance().eraseTask(task->getID());
-                task->setStatus(Task_Status_Recycle);
-                RecycleThread::getInstance().add(task);
+                RecycleThread::getInstance().add(task->getID());
             }
         }
         else
@@ -96,17 +93,13 @@ bool LoginServer::acceptConnect(const int socket,const int listenPort)
             if(TaskManager::getInstance().addTask(task))
             {
                 task->setServerType(ProtoMsgData::ST_Client);
-                task->nextStatus();
-                ret = VerifyThread::getInstance().add(task);
+                ret = VerifyThread::getInstance().add(task->getID());
             }
             if(!ret)
             {
-                TaskManager::getInstance().eraseTask(task->getID());
-                task->setStatus(Task_Status_Recycle);
-                RecycleThread::getInstance().add(task);
+                RecycleThread::getInstance().add(task->getID());
             }
         }
-        ret = true;
     }while(false);
     return ret;
 }
@@ -114,14 +107,14 @@ bool LoginServer::acceptConnect(const int socket,const int listenPort)
 bool LoginServer::initLoginIp()
 {
     bool ret = false;
+    boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
+    if(!handle)
+    {
+        return ret;
+    }
     std::vector<std::map<std::string,Flyer::FlyerValue> > ipVec;
     do
     {
-        boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
-        if(!handle)
-        {
-            break;
-        }
         std::ostringstream oss;
         oss << "select id,ip,port,outip,outport from t_serverinfo where servertype = " << ProtoMsgData::ST_Login;
         if(!handle->select(oss.str().c_str(),oss.str().size(),ipVec))
@@ -150,6 +143,7 @@ bool LoginServer::initLoginIp()
         ret = true;
 
     }while(false);
+    handle->resetStatus();
     return ret;
 }
 
@@ -195,13 +189,13 @@ void LoginServer::startServerThread()
 bool LoginServer::loadAccount()
 {
     bool ret = false;
+    boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
+    if(!handle)
+    {
+        return ret;
+    }
     do
     {
-        boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
-        if(!handle)
-        {
-            break;
-        }
         boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
         if(!redisMem)
         {
@@ -229,6 +223,7 @@ bool LoginServer::loadAccount()
         }
         ret = true;
     }while(false);
+    handle->resetStatus();
     return ret;
 }
 
