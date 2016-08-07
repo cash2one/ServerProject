@@ -7,6 +7,8 @@
 #include "clientManager.h"
 #include "superClient.h"
 #include <signal.h>
+#include "clientThread.h"
+#include "taskHandle.h"
 
 class Server
 {
@@ -113,6 +115,10 @@ class Server
                         break;
                     }
                     if(!client->sendMsg(reqVerifyServer))
+                    {
+                        break;
+                    }
+                    if(!ClientThread::getInstance().add(client->getID()))
                     {
                         break;
                     }

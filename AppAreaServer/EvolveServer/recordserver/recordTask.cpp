@@ -7,7 +7,7 @@
 
 RecordMessageDispatcher RecordTask::s_recordMsgDispatcher("档案服务器消息处理器");
 
-RecordTask::RecordTask(const int fd) : Connect(fd)
+RecordTask::RecordTask(const int fd) : Task(fd)
 {
 }
 
@@ -17,8 +17,14 @@ RecordTask::~RecordTask()
 
 MsgRet RecordTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<RecordTask> task = boost::dynamic_pointer_cast<RecordTask>(getPtr());
-    return s_recordMsgDispatcher.dispatch(task,message);
+    MsgRet ret = MR_False;
+    ret = Task::dispatcher(message);
+    if(ret == MR_No_Register)
+    {
+        boost::shared_ptr<RecordTask> task = boost::dynamic_pointer_cast<RecordTask>(getPtr());
+        ret = s_recordMsgDispatcher.dispatch(task,message);
+    }
+    return ret;
 }
 
 bool RecordTask::verify(const ProtoMsgData::ServerInfo &serverInfo)

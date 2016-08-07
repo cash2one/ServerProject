@@ -1,9 +1,10 @@
 #include "taskManager.h"
 #include "recycleThread.h"
+#include "mainThread.h"
 
-bool TaskManager::addTask(boost::shared_ptr<Connect> task)
+bool TaskManager::addTask(boost::shared_ptr<Task> task)
 {
-    std::pair<std::map<unsigned long,boost::shared_ptr<Connect> >::iterator,bool> ret = m_taskMap.insert(std::pair<unsigned long,boost::shared_ptr<Connect> >(task->getID(),task));
+    std::pair<std::map<unsigned long,boost::shared_ptr<Task> >::iterator,bool> ret = m_taskMap.insert(std::pair<unsigned long,boost::shared_ptr<Task> >(task->getID(),task));
     return ret.second;
 }
 
@@ -16,7 +17,7 @@ void TaskManager::randCloseFd(const unsigned long cnt)
         auto iter = m_taskMap.find(randID);
         if(iter != m_taskMap.end())
         {
-            boost::shared_ptr<Connect> task = iter->second;
+            boost::shared_ptr<Task> task = iter->second;
             task->closeFd();
             m_taskMap.erase(randID);
             ++num;
@@ -34,7 +35,7 @@ void TaskManager::randOpDB(const unsigned long cnt)
         auto iter = m_taskMap.find(randID);
         if(iter != m_taskMap.end())
         {
-            boost::shared_ptr<Connect> task = iter->second;
+            boost::shared_ptr<Task> task = iter->second;
             task->randTestDB();
             ++num;
         }
@@ -47,17 +48,17 @@ void TaskManager::eraseTask(const unsigned long taskID)
     m_taskMap.erase(taskID);
 }
 
-boost::shared_ptr<Connect> TaskManager::getTask(const unsigned long id)
+boost::shared_ptr<Task> TaskManager::getTask(const unsigned long id)
 {
     auto iter = m_taskMap.find(id);
-    return iter == m_taskMap.end() ? boost::shared_ptr<Connect>(NULL) : iter->second;
+    return iter == m_taskMap.end() ? boost::shared_ptr<Task>(NULL) : iter->second;
 }
 
 bool TaskManager::sendServerMsg(const unsigned int serverID,const google::protobuf::Message &message)
 {
     for(auto iter = m_taskMap.begin();iter != m_taskMap.end();++iter)
     {
-        boost::shared_ptr<Connect> task = iter->second;
+        boost::shared_ptr<Task> task = iter->second;
         if(task->getServerID() == serverID)
         {
             return task->sendMsg(message);
@@ -66,17 +67,17 @@ bool TaskManager::sendServerMsg(const unsigned int serverID,const google::protob
     return false;
 }
 
-boost::shared_ptr<Connect> TaskManager::getServerTask(const unsigned int serverID)
+boost::shared_ptr<Task> TaskManager::getServerTask(const unsigned int serverID)
 {
     for(auto iter = m_taskMap.begin();iter != m_taskMap.end();++iter)
     {
-        boost::shared_ptr<Connect> task = iter->second;
+        boost::shared_ptr<Task> task = iter->second;
         if(task->getServerID() == serverID)
         {
             return task;
         }
     }
-    return boost::shared_ptr<Connect>(NULL);
+    return boost::shared_ptr<Task>(NULL);
 }
 
 void TaskManager::sendHeartMsg()
@@ -84,7 +85,7 @@ void TaskManager::sendHeartMsg()
     std::vector<unsigned long> delVec;
     for(auto iter = m_taskMap.begin();iter != m_taskMap.end();++iter)
     {
-        boost::shared_ptr<Connect> task = iter->second;
+        boost::shared_ptr<Task> task = iter->second;
         if(!task->sendHeartMsg())
         {
             delVec.push_back(task->getID());
@@ -92,20 +93,16 @@ void TaskManager::sendHeartMsg()
     }
     for(auto iter = delVec.begin();iter != delVec.end();++iter)
     {
-        boost::shared_ptr<Connect> task = getTask(*iter);
-        if(task)
-        {
-            RecycleThread::getInstance().add(task);
-        }
+        MainThread::getInstance().addRecycle(*iter);
     }
 }
 
 bool TaskManager::addGatewayTask(const unsigned charID,const unsigned long id)
 {
-    bool ret = false;
+    bool flag = false;
     do
     {
-        boost::shared_ptr<Connect> task = getTask(id);
+        boost::shared_ptr<Task> task = getTask(id);
         if(!task)
         {
             break;
@@ -114,20 +111,20 @@ bool TaskManager::addGatewayTask(const unsigned charID,const unsigned long id)
         {
             break;
         }
-        m_charIDMap.insert(std::pair<unsigned long,boost::shared_ptr<Connect> >(charID,task));
-        ret = true;
+        m_charIDMap.insert(std::pair<unsigned long,unsigned long>(charID,id));
+        flag = true;
     }while(false);
-    return ret;
+    return flag;
 }
 
-boost::shared_ptr<Connect> TaskManager::getGatewayTask(const unsigned charID)
+boost::shared_ptr<Task> TaskManager::getGatewayTask(const unsigned charID)
 {
     auto iter = m_charIDMap.find(charID);
     if(iter != m_charIDMap.end())
     {
-        return iter->second;
+        return getTask(iter->second);
     }
-    return boost::shared_ptr<Connect>(NULL);
+    return boost::shared_ptr<Task>(NULL);
 }
 
 

@@ -1,12 +1,12 @@
 #ifndef SUPER_TASK_H
 #define SUPER_TASK_H
-#include "connect.h"
+#include "task.h"
 #include "messageDispatcher.h"
 #include "system.pb.h"
 
 class SuperTask;
 typedef MessageDispatcher<boost::shared_ptr<SuperTask> > SuperMessageDispatcher;
-class SuperTask : public Connect
+class SuperTask : public Task 
 {
     public:
         SuperTask(const int fd);

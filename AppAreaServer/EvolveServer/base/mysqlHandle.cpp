@@ -189,4 +189,7 @@ bool MysqlHandle::select(const char *sql,const unsigned int sqlLen,std::vector<s
     return ret;
 }
         
-
+void MysqlHandle::resetStatus()
+{
+    m_status = Handle_Valid;
+}

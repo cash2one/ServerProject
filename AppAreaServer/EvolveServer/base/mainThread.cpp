@@ -1,31 +1,31 @@
 #include "mainThread.h"
-#include "flyer.h"
 #include "recycleThread.h"
 #include "taskManager.h"
 
-bool MainThread::add(boost::shared_ptr<Connect> task)
+bool MainThread::add(const unsigned long id)
 {
-    std::pair<std::map<unsigned long,boost::shared_ptr<Connect> >::iterator,bool> ret = m_taskSet.insert(std::pair<unsigned long,boost::shared_ptr<Connect> >(task->getID(),task));
-    if(ret.second)
+    bool flag = false;
+    do
     {
+        boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(id);
+        if(!task)
+        {
+            break;
+        }
+        std::pair<std::set<unsigned long>::iterator,bool> ret = m_taskSet.insert(id);
+        flag = ret.second;
+        if(!flag)
+        {
+            break;
+        }
+        task->setStatus(Task_Status_Main);
         task->addEpoll(m_epfd,EPOLLIN | EPOLLOUT | EPOLLPRI | EPOLLERR);
-    }
-    if(m_taskSet.size() > m_epollEventVec.size())
-    {
-        m_epollEventVec.resize(m_taskSet.size() + atol(Flyer::globalConfMap["addepollsize"].c_str()));
-    }
-    return ret.second;
-}
-
-boost::shared_ptr<Connect> MainThread::getTask(const unsigned long id)
-{
-    boost::shared_ptr<Connect> task(NULL);
-    auto itr = m_taskSet.find(id);
-    if(itr != m_taskSet.end())
-    {
-        task = itr->second;
-    }
-    return task;
+        if(m_taskSet.size() > m_epollEventVec.size())
+        {
+            m_epollEventVec.resize(m_taskSet.size() + atol(Flyer::globalConfMap["addepollsize"].c_str()));
+        }
+    }while(false);
+    return flag;
 }
 
 void MainThread::run()
@@ -44,7 +44,7 @@ void MainThread::run()
                 unsigned long taskID = event.data.u64;
                 do
                 {
-                    boost::shared_ptr<Connect> task = getTask(taskID);
+                    boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(taskID);
                     if(!task)
                     {
                         break;
@@ -74,51 +74,32 @@ void MainThread::run()
             }
             for(auto iter = delVec.begin();iter != delVec.end();++iter)
             {
-                const unsigned long id = *iter;
-                boost::shared_ptr<Connect> task = getTask(id);
-                task = task ? task : TaskManager::getInstance().getTask(id);
-                if(task)
-                {
-                    task->delEpoll(m_epfd,EPOLLIN);
-                    task->setStatus(Task_Status_Recycle);
-                    RecycleThread::getInstance().add(task);
-                }
-                m_taskSet.erase(id);
+                addRecycle(*iter);
             }
             delVec.clear();
-            for(auto iter = m_taskSet.begin();iter != m_taskSet.end();++iter)
-            {
-                boost::shared_ptr<Connect> task = getTask(iter->first);
-                if(!task || task->getStatus() == Task_Status_Recycle)
-                {
-                    delVec.push_back(iter->first);
-                }
-            }
-            for(auto iter = delVec.begin();iter != delVec.end();++iter)
-            {
-                const unsigned long id = *iter;
-                boost::shared_ptr<Connect> task = getTask(id);
-                task = task ? task : TaskManager::getInstance().getTask(id);
-                if(task)
-                {
-                    task->delEpoll(m_epfd,EPOLLIN);
-                    task->setStatus(Task_Status_Recycle);
-                    RecycleThread::getInstance().add(task);
-                }
-                m_taskSet.erase(id);
-            }
         }
         msleep(atol(Flyer::globalConfMap["threadsleep"].c_str()));
     }
 
     for(auto iter = m_taskSet.begin();iter != m_taskSet.end();++iter)
     {
-        boost::shared_ptr<Connect> task = iter->second;
-        task->delEpoll(m_epfd,EPOLLIN);
-        task->setStatus(Task_Status_Recycle);
-        RecycleThread::getInstance().add(task);
+        addRecycle(*iter,false);
     }
     m_taskSet.clear();
+}
+
+void MainThread::addRecycle(const unsigned long id,const bool del)
+{
+    boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(id);
+    if(task)
+    {
+        task->delEpoll(m_epfd,EPOLLIN);
+        RecycleThread::getInstance().add(id);
+    }
+    if(del)
+    {
+        m_taskSet.erase(id);
+    }
 }
 
 

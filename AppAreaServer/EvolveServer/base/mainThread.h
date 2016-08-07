@@ -3,13 +3,15 @@
 #include "singleton.h"
 #include "taskQueue.h"
 #include "head.h"
+#include "thread.h"
+#include "flyer.h"
 
 class MainThread : public Thread,public TaskQueue,public Singleton<MainThread>
 {
     private:
         int m_epfd;
         std::vector<struct epoll_event> m_epollEventVec;
-        std::map<unsigned long,boost::shared_ptr<Connect> > m_taskSet;
+        std::set<unsigned long> m_taskSet;
     private:
         friend class Singleton<MainThread>;
         MainThread() : Thread("主线程")
@@ -21,9 +23,9 @@ class MainThread : public Thread,public TaskQueue,public Singleton<MainThread>
             TEMP_FAILURE_RETRY(::close(m_epfd));
         }
     public:
-        bool add(boost::shared_ptr<Connect> task);
-        boost::shared_ptr<Connect> getTask(const unsigned long id);
+        bool add(const unsigned long id);
         virtual void run();
+        void addRecycle(const unsigned long id,const bool del = true);
 };
 
 #endif

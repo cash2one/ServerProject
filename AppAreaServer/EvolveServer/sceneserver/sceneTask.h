@@ -1,12 +1,12 @@
 #ifndef SCENE_TASK_H
 #define SCENE_TASK_H
-#include "connect.h"
+#include "task.h"
 #include "messageDispatcher.h"
 #include "system.pb.h"
 
 class SceneTask;
 typedef MessageDispatcher<boost::shared_ptr<SceneTask> > SceneMessageDispatcher;
-class SceneTask : public Connect
+class SceneTask : public Task 
 {
     public:
         SceneTask(const int fd);

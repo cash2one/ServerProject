@@ -158,14 +158,11 @@ bool GatewayServer::acceptConnect(const int socket,const int listenFd)
     if(TaskManager::getInstance().addTask(task))
     {
         task->setServerType(ProtoMsgData::ST_Client);
-        task->nextStatus();
-        ret = VerifyThread::getInstance().add(task);
+        ret = VerifyThread::getInstance().add(task->getID());
     }
     else
     {
-        TaskManager::getInstance().eraseTask(task->getID());
-        task->setStatus(Task_Status_Recycle);
-        RecycleThread::getInstance().add(task);
+        RecycleThread::getInstance().add(task->getID());
     }
     return ret;
 }

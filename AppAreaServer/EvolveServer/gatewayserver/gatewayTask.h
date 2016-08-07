@@ -1,12 +1,12 @@
 #ifndef GATE_WAY_TASK_H
 #define GATE_WAY_TASK_H 
-#include "connect.h"
+#include "task.h"
 #include "messageDispatcher.h"
 #include "login.pb.h"
 
 class GatewayTask;
 typedef MessageDispatcher<boost::shared_ptr<GatewayTask> > GatewayMessageDispatcher;
-class GatewayTask : public Connect
+class GatewayTask : public Task 
 {
     public:
         GatewayTask(const int fd);

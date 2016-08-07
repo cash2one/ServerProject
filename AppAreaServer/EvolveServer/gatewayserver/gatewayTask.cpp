@@ -10,7 +10,7 @@
 #include "sceneClient.h"
 
 GatewayMessageDispatcher GatewayTask::s_gatewayMsgDispatcher("网关服务器消息处理器");
-GatewayTask::GatewayTask(const int fd) : Connect(fd),m_charID(0),m_isLogin(false),m_sceneID(0)
+GatewayTask::GatewayTask(const int fd) : Task(fd),m_charID(0),m_isLogin(false),m_sceneID(0)
 {
 }
 
@@ -20,22 +20,27 @@ GatewayTask::~GatewayTask()
 
 MsgRet GatewayTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<GatewayTask> task = boost::dynamic_pointer_cast<GatewayTask>(getPtr());
-    MsgRet ret = s_gatewayMsgDispatcher.dispatch(task,message);
+    MsgRet ret = MR_False;
+    ret = Task::dispatcher(message);
     if(ret == MR_No_Register)
     {
-        bool flg = false;
-        boost::shared_ptr<Client> client = ClientManager::getInstance().getServerClient(task->getSceneID());
-        boost::shared_ptr<SceneClient> sceneClient = boost::dynamic_pointer_cast<SceneClient>(client);
-        if(sceneClient)
+        boost::shared_ptr<GatewayTask> task = boost::dynamic_pointer_cast<GatewayTask>(getPtr());
+        MsgRet ret = s_gatewayMsgDispatcher.dispatch(task,message);
+        if(ret == MR_No_Register)
         {
-            google::protobuf::Message *msg = message.get();
-            if(msg)
+            bool flg = false;
+            boost::shared_ptr<Client> client = ClientManager::getInstance().getServerClient(task->getSceneID());
+            boost::shared_ptr<SceneClient> sceneClient = boost::dynamic_pointer_cast<SceneClient>(client);
+            if(sceneClient)
             {
-                flg = sceneClient->sendMsg(*msg);
+                google::protobuf::Message *msg = message.get();
+                if(msg)
+                {
+                    flg = sceneClient->sendMsg(*msg);
+                }
             }
+            ret = flg ? MR_True : MR_False; 
         }
-        ret = flg ? MR_True : MR_False; 
     }
     return ret;
 }
@@ -248,11 +253,7 @@ bool GatewayTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> m
     sendMsg(ackMsg);
     if(!ret)
     {
-        boost::shared_ptr<Connect> connect = TaskManager::getInstance().getTask(getID());
-        if(connect)
-        {
-            RecycleThread::getInstance().add(connect);
-        }
+        RecycleThread::getInstance().add(getID());
     }
     else
     {

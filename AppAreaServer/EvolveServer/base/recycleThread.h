@@ -3,11 +3,13 @@
 #include "singleton.h"
 #include "taskQueue.h"
 #include "head.h"
+#include "flyer.h"
+#include "thread.h"
 
 class RecycleThread : public Thread,public TaskQueue,public Singleton<RecycleThread>
 {
     private:
-        std::map<unsigned long,boost::shared_ptr<Connect> > m_taskSet;
+        std::set<unsigned long> m_taskSet;
     private:
         friend class Singleton<RecycleThread>;
         RecycleThread() : Thread("回收线程")
@@ -17,7 +19,7 @@ class RecycleThread : public Thread,public TaskQueue,public Singleton<RecycleThr
         {
         }
     public:
-        bool add(boost::shared_ptr<Connect> task);
+        bool add(const unsigned long id);
         virtual void run();
 };
 

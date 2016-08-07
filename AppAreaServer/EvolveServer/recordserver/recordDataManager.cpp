@@ -31,13 +31,13 @@ bool RecordDataManager::init()
 bool RecordDataManager::loadUserData()
 {
     bool ret = false;
+    boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
+    if(!handle)
+    {
+        return ret;
+    }
     do
     {
-        boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
-        if(!handle)
-        {
-            break;
-        }
         std::vector<std::map<std::string,Flyer::FlyerValue> > ipVec;
         char temp[100] = {0};
         snprintf(temp,sizeof(temp),"select * from t_user");
@@ -113,6 +113,7 @@ bool RecordDataManager::loadUserData()
         }
         ret = true;
     }while(false);
+    handle->resetStatus();
     Info(Flyer::logger,"[加载角色信息完毕] (" << s_charID << "," << ret << ")")
     return ret;
 }
@@ -120,15 +121,15 @@ bool RecordDataManager::loadUserData()
 bool RecordDataManager::loop()
 {
     bool ret = false;
+    boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
+    if(!handle)
+    {
+        return ret;
+    }
     do
     {
         boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
         if(!redisMem)
-        {
-            break;
-        }
-        boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
-        if(!handle)
         {
             break;
         }
@@ -183,19 +184,20 @@ bool RecordDataManager::loop()
         }
         ret = true;
     }while(false);
+    handle->resetStatus();
     return ret;
 }
 
 bool RecordDataManager::createUser(const std::string &phone,unsigned long &charID)
 {
     bool ret = false;
+    boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
+    if(!handle)
+    {
+        return ret;
+    }
     do
     {
-        boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
-        if(!handle)
-        {
-            break;
-        }
         ProtoMsgData::UserBinary binary;
         binary.set_phone(phone);
         binary.set_charid(s_charID + 1);
@@ -237,6 +239,7 @@ bool RecordDataManager::createUser(const std::string &phone,unsigned long &charI
         charID = binary.charid();
         ret = true;
     }while(false);
+    handle->resetStatus();
     char temp[100] = {0};
     snprintf(temp,sizeof(temp),"[新建角色] %s(%s)",ret ? "成功" : "失败", phone.c_str());
     Info(Flyer::logger,temp);

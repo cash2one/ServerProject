@@ -1,7 +1,7 @@
 #ifndef TASK_MANAGER_H
 #define TASK_MANAGER_H
 #include "head.h"
-#include "connect.h"
+#include "task.h"
 
 class TaskManager : public Singleton<TaskManager>
 {
@@ -14,8 +14,8 @@ class TaskManager : public Singleton<TaskManager>
         {
         }
     public:
-        bool addTask(boost::shared_ptr<Connect> task);
-        boost::shared_ptr<Connect> getTask(const unsigned long id);
+        bool addTask(boost::shared_ptr<Task> task);
+        boost::shared_ptr<Task> getTask(const unsigned long id);
         inline size_t size() const
         {
             return m_taskMap.size();
@@ -24,14 +24,14 @@ class TaskManager : public Singleton<TaskManager>
         void randCloseFd(const unsigned long cnt);
         void randOpDB(const unsigned long cnt);
         bool sendServerMsg(const unsigned int serverID,const google::protobuf::Message &message);
-        boost::shared_ptr<Connect> getServerTask(const unsigned int serverID);
+        boost::shared_ptr<Task> getServerTask(const unsigned int serverID);
         void sendHeartMsg();
         bool addGatewayTask(const unsigned charID,const unsigned long id);
-        boost::shared_ptr<Connect> getGatewayTask(const unsigned charID);
+        boost::shared_ptr<Task> getGatewayTask(const unsigned charID);
     private:
-        std::map<unsigned long,boost::shared_ptr<Connect> > m_taskMap;
+        std::map<unsigned long,boost::shared_ptr<Task> > m_taskMap;
         //专门用来装gatewayTask的
-        std::map<unsigned long,boost::shared_ptr<Connect> >m_charIDMap;
+        std::map<unsigned long,unsigned long>m_charIDMap;
 };
 
 #endif

@@ -1,12 +1,22 @@
 #include "recycleThread.h"
 #include "flyer.h"
 #include "taskManager.h"
-#include "client.h"
+#include "clientManager.h"
 
-bool RecycleThread::add(boost::shared_ptr<Connect> task)
+bool RecycleThread::add(const unsigned long id)
 {
-    m_taskSet.insert(std::pair<unsigned long,boost::shared_ptr<Connect> >(task->getID(),task));
-    return true;
+    bool flag = false;
+    do
+    {
+        boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(id);
+        if(task)
+        {
+            task->setStatus(Task_Status_Recycle);
+        }
+        std::pair<std::set<unsigned long>::iterator,bool> ret = m_taskSet.insert(id);
+        flag = ret.second;
+    }while(false);
+    return flag;
 }
 
 void RecycleThread::run()
@@ -18,15 +28,20 @@ void RecycleThread::run()
         {
             for(auto iter = m_taskSet.begin();iter != m_taskSet.end();++iter)
             {
-                boost::shared_ptr<Connect> task = iter->second;
+                boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(*iter);
                 if(task)
                 {
-                    boost::shared_ptr<Client> client = boost::dynamic_pointer_cast<Client>(task);
-                    if(!client)
-                    {
-                        TaskManager::getInstance().eraseTask(task->getID());
-                    }
                     task->closeFd();
+                    TaskManager::getInstance().eraseTask(*iter);
+                }
+                else
+                {
+                    boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(*iter);
+                    if(client)
+                    {
+                        client->closeFd();
+                        ClientManager::getInstance().eraseClient(*iter);
+                    }
                 }
             }
             m_taskSet.clear();
@@ -35,11 +50,20 @@ void RecycleThread::run()
     }
     for(auto iter = m_taskSet.begin();iter != m_taskSet.end();++iter)
     {
-        boost::shared_ptr<Connect> task = iter->second;
+        boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(*iter);
         if(task)
         {
             task->closeFd();
-            TaskManager::getInstance().eraseTask(task->getID());
+            TaskManager::getInstance().eraseTask(*iter);
+        }
+        else
+        {
+            boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(*iter);
+            if(client)
+            {
+                task->closeFd();
+                ClientManager::getInstance().eraseClient(*iter);
+            }
         }
     }
     m_taskSet.clear();

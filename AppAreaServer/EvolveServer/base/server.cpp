@@ -13,6 +13,7 @@
 #include "verifyThread.h"
 #include "redisMemManager.h"
 #include "connectHandle.h"
+#include "clientThread.h"
 
 Server::Server(const std::string &name,const ProtoMsgData::ServerType &type) : m_name(name),m_type(type),m_id(0),m_port(0),m_fd(-1),m_epfd(-1),m_verify(false),m_outIp(),m_outPort(0),m_outFd(-1),m_superClient(NULL),m_terminate(false)
 {
@@ -97,6 +98,7 @@ bool Server::init()
             m_superClient = boost::shared_ptr<SuperClient>(new SuperClient(this));
         }
         MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ConnectHandle>(new ConnectHandle()));
+        MessageHandleManager::getInstance().addHandle(boost::shared_ptr<TaskHandle>(new TaskHandle()));
         if(m_type != ProtoMsgData::ST_Login && m_type != ProtoMsgData::ST_Record)
         {
             MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ClientHandle>(new ClientHandle()));
@@ -338,7 +340,7 @@ void Server::startThread()
     MainThread::getInstance().start();
     if(m_type != ProtoMsgData::ST_Login && m_type != ProtoMsgData::ST_Record)
     {
-        ClientManager::getInstance().start();
+        ClientThread::getInstance().start();
     }
 }
 
@@ -359,8 +361,8 @@ void Server::endThread()
 
     if(m_type != ProtoMsgData::ST_Login && m_type != ProtoMsgData::ST_Record)
     {
-        ClientManager::getInstance().final();
-        ClientManager::getInstance().end();
+        ClientThread::getInstance().final();
+        ClientThread::getInstance().end();
     }
      
     RecycleThread::getInstance().final();

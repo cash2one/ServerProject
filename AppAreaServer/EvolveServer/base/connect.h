@@ -7,6 +7,7 @@
 #include "timefun.h"
 #include "system.pb.h"
 #include "messageDispatcher.h"
+#include "verifyThread.h"
 
 enum TaskStatus
 {
@@ -60,6 +61,10 @@ class Connect : private DisCopy , public boost::enable_shared_from_this<Connect>
         inline void setVerify(const bool verify)
         {
             m_verify = verify;
+            if(m_verify)
+            {
+                VerifyThread::getInstance().addMain(m_id);
+            }
         }
         inline unsigned long getID() const
         {

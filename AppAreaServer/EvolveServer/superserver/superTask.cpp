@@ -5,7 +5,7 @@
 #include "taskManager.h"
 
 SuperMessageDispatcher SuperTask::s_superMsgDispatcher("管理服务器消息处理器");
-SuperTask::SuperTask(const int fd) : Connect(fd),m_notifyFlg(false)
+SuperTask::SuperTask(const int fd) : Task(fd),m_notifyFlg(false)
 {
 }
 
@@ -15,8 +15,14 @@ SuperTask::~SuperTask()
 
 MsgRet SuperTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<SuperTask> task = boost::dynamic_pointer_cast<SuperTask>(getPtr());
-    return s_superMsgDispatcher.dispatch(task,message);
+    MsgRet ret = MR_False;
+    ret = Task::dispatcher(message);
+    if(ret == MR_No_Register)
+    {
+        boost::shared_ptr<SuperTask> task = boost::dynamic_pointer_cast<SuperTask>(getPtr());
+        ret = s_superMsgDispatcher.dispatch(task,message);
+    }
+    return ret;
 }
 
 bool SuperTask::accepteResp(const unsigned int serverID)
@@ -34,6 +40,11 @@ bool SuperTask::accepteResp(const unsigned int serverID)
 bool SuperTask::getDependMap(const ProtoMsgData::ServerType &serverType)
 {
     bool ret = false;
+    boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
+    if(!handle)
+    {
+        return ret;
+    }
     std::vector<std::map<std::string,Flyer::FlyerValue> > ipVec;
     do
     {
@@ -43,14 +54,9 @@ bool SuperTask::getDependMap(const ProtoMsgData::ServerType &serverType)
             break;
         }
         m_dependMap.clear();
-        boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
-        if(!handle)
-        {
-            break;
-        }
-        char temp[100] = {0};
-        snprintf(temp,sizeof(temp),"select id,ip,port,servertype from t_serverinfo where servertype < %u",serverType);
-        if(!handle->select(temp,strlen(temp),ipVec))
+        std::ostringstream oss;
+        oss << "select id,ip,port,servertype from t_serverinfo where servertype < " << serverType;
+        if(!handle->select(oss.str().c_str(),oss.str().size(),ipVec))
         {
             break;
         }
@@ -84,52 +90,58 @@ bool SuperTask::getDependMap(const ProtoMsgData::ServerType &serverType)
         }
         ret = breakFlg ? false : true;
     }while(false);
+    handle->resetStatus();
     return ret;
 }
 
 bool SuperTask::notifyDepend()
 {
-    if(m_notifyFlg)
+    do
     {
-        return true;
-    }
-    ProtoMsgData::AckUpdateServerInfo ackMsg;
-    ProtoMsgData::ServerInfo *selfInfo = SuperServer::getInstance().getServer(m_serverID);
-    if(!selfInfo)
-    {
-        return false;
-    }
-    ProtoMsgData::ServerInfo *serverInfo = ackMsg.mutable_serverinfo();
-    if(!serverInfo)
-    {
-        return false;
-    }
-    *serverInfo = *selfInfo;
-    for(auto iter = m_dependMap.begin();iter != m_dependMap.end();++iter)
-    {
-        if(!TaskManager::getInstance().sendServerMsg(iter->first,ackMsg))
+        if(m_notifyFlg)
         {
-            return false;
+            break;
         }
-    }
-    m_notifyFlg = true;
-    return true;
+        ProtoMsgData::AckUpdateServerInfo ackMsg;
+        ProtoMsgData::ServerInfo *selfInfo = SuperServer::getInstance().getServer(m_serverID);
+        if(!selfInfo)
+        {
+            break;
+        }
+        ProtoMsgData::ServerInfo *serverInfo = ackMsg.mutable_serverinfo();
+        if(!serverInfo)
+        {
+            break;
+        }
+        bool flag = true;
+        *serverInfo = *selfInfo;
+        for(auto iter = m_dependMap.begin();iter != m_dependMap.end();++iter)
+        {
+            if(!TaskManager::getInstance().sendServerMsg(iter->first,ackMsg))
+            {
+                flag = false;
+                break;
+            }
+        }
+        m_notifyFlg = flag;
+    }while(false);
+    return m_notifyFlg;
 }
 
 bool SuperTask::verifyIp(const ProtoMsgData::ServerType &serverType)
 {
     bool ret = false;
+    boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
+    if(!handle)
+    {
+        return ret;
+    }
     std::vector<std::map<std::string,Flyer::FlyerValue> > ipVec;
     do
     {
         if(m_notifyFlg)
         {
             ret = true;
-            break;
-        }
-        boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
-        if(!handle)
-        {
             break;
         }
         std::ostringstream oss;
@@ -164,6 +176,7 @@ bool SuperTask::verifyIp(const ProtoMsgData::ServerType &serverType)
             break;
         }
     }while(false);
+    handle->resetStatus();
     return ret;
 }
 
