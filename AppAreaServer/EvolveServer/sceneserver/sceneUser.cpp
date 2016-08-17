@@ -118,7 +118,7 @@ bool SceneUser::initAttr()
     return ret;
 }
 
-unsigned int SceneUser::serializeToArray(unsigned char array[])
+unsigned int SceneUser::serializeToArray(char *array)
 {
     ProtoMsgData::UserBinary binary;
     serializeToBinary(binary);
@@ -132,7 +132,7 @@ bool SceneUser::saveData(const bool force)
     do
     {
         bool saveFlg = true;
-        unsigned char buffer[Flyer::msglen];
+        char buffer[Flyer::msglen];
         bzero(buffer,sizeof(buffer));
         unsigned int size = serializeToArray(buffer);
         unsigned char md5[16];
@@ -159,7 +159,7 @@ bool SceneUser::saveData(const bool force)
        {
            break;
        }
-       if(!redisMem->setBin("serialize",m_charID,"user",(const char*)buffer,size))
+       if(!redisMem->setBin("serialize",m_charID,"user",buffer,size))
        {
            break;
        }
@@ -174,5 +174,7 @@ bool SceneUser::saveData(const bool force)
        }
        ret = MR_True;
     }while(false);
-    return ret == MR_False ? false : true;
+    bool flag = ret == MR_False ? false : true;
+    Info(Flyer::logger,"[角色信息存档] (" << (flag ? "成功" : "失败") << "," << m_charID << ")");
+    return flag;
 }

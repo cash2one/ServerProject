@@ -19,6 +19,7 @@ class SceneTimeTick : public Thread , public Singleton<SceneTimeTick>
         TimeClock m_hourClock;
         TimeClock m_halfHourClock;
         TimeClock m_tenSecClock;
+        TimeClock m_heartClock;;
 };
 
 #endif

@@ -17,12 +17,16 @@ LoginTask::~LoginTask()
 
 MsgRet LoginTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    MsgRet ret = MR_False;
+    MsgRet ret = MR_No_Register;
     ret = Task::dispatcher(message);
     if(ret == MR_No_Register)
     {
-        boost::shared_ptr<LoginTask> task = boost::dynamic_pointer_cast<LoginTask>(getPtr());
-        ret = s_loginMsgDispatcher.dispatch(task,message);
+        boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(m_id);
+        boost::shared_ptr<LoginTask> loginTask = boost::dynamic_pointer_cast<LoginTask>(task);
+        if(loginTask)
+        {
+            ret = s_loginMsgDispatcher.dispatch(loginTask,message);
+        }
     }
     return ret;
 }
@@ -116,7 +120,8 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
             {
                 break;
             }
-            char temp[Flyer::msglen] = {0};
+            char temp[Flyer::msglen];
+            bzero(temp,sizeof(temp));
             unsigned int len = redisMem->getBin("gateway",*iter,temp);
             ProtoMsgData::GatewayInfo gateInfo;
             gateInfo.ParseFromArray(temp,len);
@@ -127,6 +132,7 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
                 port = gateInfo.port();
                 ip = gateInfo.ip();
             }
+            Info(Flyer::logger,"[查找网关] (" << gateInfo.id() << ")");
         }
         if(!lessID)
         {

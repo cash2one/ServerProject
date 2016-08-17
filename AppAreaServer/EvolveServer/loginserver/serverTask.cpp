@@ -16,8 +16,18 @@ ServerTask::~ServerTask()
 
 MsgRet ServerTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<ServerTask> task = boost::dynamic_pointer_cast<ServerTask>(getPtr());
-    return s_serverMsgDispatcher.dispatch(task,message);
+    MsgRet ret = MR_No_Register;
+    ret = Task::dispatcher(message);
+    if(ret == MR_No_Register)
+    {
+        boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(m_id);
+        boost::shared_ptr<ServerTask> serverTask = boost::dynamic_pointer_cast<ServerTask>(task);
+        if(serverTask)
+        {
+            ret = s_serverMsgDispatcher.dispatch(serverTask,message);
+        }
+    }
+    return ret;
 }
 
 bool ServerTask::verify(const ProtoMsgData::ServerInfo &serverInfo)

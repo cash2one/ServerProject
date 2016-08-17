@@ -17,12 +17,16 @@ RecordTask::~RecordTask()
 
 MsgRet RecordTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    MsgRet ret = MR_False;
+    MsgRet ret = MR_No_Register;
     ret = Task::dispatcher(message);
     if(ret == MR_No_Register)
     {
-        boost::shared_ptr<RecordTask> task = boost::dynamic_pointer_cast<RecordTask>(getPtr());
-        ret = s_recordMsgDispatcher.dispatch(task,message);
+        boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(m_id);
+        boost::shared_ptr<RecordTask> recordTask = boost::dynamic_pointer_cast<RecordTask>(task);
+        if(recordTask)
+        {
+            ret = s_recordMsgDispatcher.dispatch(recordTask,message);
+        }
     }
     return ret;
 }

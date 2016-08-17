@@ -80,6 +80,7 @@ bool LoginServer::acceptConnect(const int socket,const int listenPort)
             boost::shared_ptr<ServerTask> task(new ServerTask(socket));
             if(TaskManager::getInstance().addTask(task))
             {
+                task->setServerType(ProtoMsgData::ST_Super);
                 ret = VerifyThread::getInstance().add(task->getID());
             }
             if(!ret)

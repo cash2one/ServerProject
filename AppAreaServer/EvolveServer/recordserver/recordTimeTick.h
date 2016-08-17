@@ -19,6 +19,8 @@ class RecordTimeTick : public Thread , public Singleton<RecordTimeTick>
         TimeClock m_hourClock;
         TimeClock m_halfHourClock;
         TimeClock m_tenSecClock;
+        TimeClock m_heartClock;
+        TimeClock m_dbClock;
 };
 
 #endif

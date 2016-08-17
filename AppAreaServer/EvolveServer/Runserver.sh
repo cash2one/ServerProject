@@ -60,7 +60,7 @@ start()
         then
             echo "start ./recordserver/RecordServer"
             ./recordserver/RecordServer -d
-            sleep 1
+            sleep 5
         fi
     done
 

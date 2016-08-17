@@ -20,12 +20,16 @@ SceneTask::~SceneTask()
 
 MsgRet SceneTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    MsgRet ret = MR_False;
+    MsgRet ret = MR_No_Register;
     ret = Task::dispatcher(message);
     if(ret == MR_No_Register)
     {
-        boost::shared_ptr<SceneTask> task = boost::dynamic_pointer_cast<SceneTask>(getPtr());
-        ret = s_sceneMsgDispatcher.dispatch(task,message);
+        boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(m_id);
+        boost::shared_ptr<SceneTask> sceneTask = boost::dynamic_pointer_cast<SceneTask>(task);
+        if(sceneTask)
+        {
+            ret = s_sceneMsgDispatcher.dispatch(sceneTask,message);
+        }
     }
     return ret;
 }
@@ -61,8 +65,9 @@ bool SceneTask::login(const unsigned long charID)
         {
             break;
         }
-        char buffer[Flyer::msglen] = {0};
-        unsigned long size = redisMem->getBin("userbinary",charID,buffer);
+        char buffer[Flyer::msglen];
+        bzero(buffer,sizeof(buffer));
+        unsigned int size = redisMem->getBin("userbinary",charID,buffer);
         ProtoMsgData::UserBinary binary;
         try
         {
@@ -91,9 +96,9 @@ bool SceneTask::login(const unsigned long charID)
     ackMsg.set_charid(charID);
     sendMsg(ackMsg);
 
-    char temp[100] = {0};
-    snprintf(temp,sizeof(temp),"[登录网关(登录场景)] (%s,%lu)",ret ? "成功" : "失败",charID);
-    Debug(Flyer::logger,temp);
+    std::ostringstream oss;
+    oss << "[登录网关(登录场景)] (" << (ret ? "成功" : "失败") << "," << charID << ")";
+    Debug(Flyer::logger,oss.str().c_str());
     return ret;
 }
 

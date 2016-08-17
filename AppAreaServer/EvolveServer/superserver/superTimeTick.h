@@ -18,6 +18,7 @@ class SuperTimeTick : public Thread , public Singleton<SuperTimeTick>
         TimeClock m_minClock;
         TimeClock m_hourClock;
         TimeClock m_halfHourClock;
+        TimeClock m_heartClock;
 };
 
 #endif

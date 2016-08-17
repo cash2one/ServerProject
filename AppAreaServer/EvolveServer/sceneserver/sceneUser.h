@@ -23,7 +23,7 @@ class SceneUser
         bool saveData(const bool force = false);
     private:
         bool initAttr();
-        unsigned int serializeToArray(unsigned char array[]);
+        unsigned int serializeToArray(char *array);
     private:
         unsigned long m_charID;
         std::string m_phone;

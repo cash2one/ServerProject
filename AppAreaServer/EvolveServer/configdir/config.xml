@@ -27,13 +27,19 @@
         <!--线程睡眠时间(毫秒)-->
         <threadsleep>10</threadsleep>
         <!--连接等待时间-->
-        <taskwaittime>60</taskwaittime>
+        <taskwaittime>120</taskwaittime>
         <!--用户最大数据-->
-        <datasize>10240</datasize>
+        <datasize>1000</datasize>
         <!--excel表数据目录-->
         <exceltbx>configdir/excelTbx/</exceltbx>
          <!--心跳包间隔-->
         <hearttime>100</hearttime>
+        <!--心跳批次-->
+        <heartcycle>5</heartcycle>
+        <!--存档时间-->
+        <savedata>120</savedata>
+        <!--数据库存档批次-->
+        <dbcycle>40</dbcycle>
         <!--redis配置文件-->
         <redisxml>configdir/xmlConfig/redisConfig.xml</redisxml>
         <!--http 超时秒数-->

@@ -54,7 +54,8 @@ bool RecordDataManager::loadUserData()
             }
             unsigned long charID = tempMap["charid"];
             std::string binary = tempMap["binary"];
-            char buffer[Flyer::msglen] = {0};
+            char buffer[Flyer::msglen];
+            bzero(buffer,sizeof(buffer));
             memmove(buffer,binary.c_str(),binary.size());
             ProtoMsgData::UserBinary userBinary;
             bool isLoad = true;
@@ -118,8 +119,9 @@ bool RecordDataManager::loadUserData()
     return ret;
 }
 
-bool RecordDataManager::loop()
+bool RecordDataManager::loop(const unsigned cycle)
 {
+    unsigned int cycleTotal = atol(Flyer::globalConfMap["dbcycle"].c_str());
     bool ret = false;
     boost::shared_ptr<MysqlHandle> handle = MysqlPool::getInstance().getIdleHandle();
     if(!handle)
@@ -142,6 +144,10 @@ bool RecordDataManager::loop()
         {
             bool flag = false;
             unsigned long charID = *iter;
+            if(charID % cycleTotal != cycle)
+            {
+                continue;
+            }
             do
             {
                 redisMem = RedisMemManager::getInstance().getRedis(charID);
@@ -149,9 +155,9 @@ bool RecordDataManager::loop()
                 {
                     break;
                 }
-                unsigned char buffer[Flyer::msglen];
+                char buffer[Flyer::msglen];
                 bzero(buffer,sizeof(buffer));
-                unsigned int size = redisMem->getBin("serialize",charID,"user",(char*)buffer);
+                unsigned int size = redisMem->getBin("serialize",charID,"user",buffer);
                 if(!size)
                 {
                     break;
@@ -204,6 +210,7 @@ bool RecordDataManager::createUser(const std::string &phone,unsigned long &charI
         binary.set_ontime(0);
         binary.set_offtime(0);
         char buffer[Flyer::msglen];
+        bzero(buffer,sizeof(buffer));
         binary.SerializeToArray(buffer,sizeof(buffer));
         std::ostringstream oss;
         oss << "insert into t_user values(" << binary.charid() << ",'" << binary.phone() << "',";

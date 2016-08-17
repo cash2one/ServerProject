@@ -12,7 +12,7 @@ class RecordDataManager : public Singleton<RecordDataManager>
     public:
         bool init();
         bool createUser(const std::string &phone,unsigned long &charID);
-        bool loop();
+        bool loop(const unsigned cycle);
     private:
         static unsigned long s_charID;
 };

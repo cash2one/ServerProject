@@ -12,14 +12,18 @@ RecordClient::~RecordClient()
 
 MsgRet RecordClient::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    MsgRet ret = MR_False;
+    MsgRet ret = MR_No_Register;
     do
     {
         ret = Client::dispatcher(message);
         if(ret == MR_No_Register)
         {
-            boost::shared_ptr<RecordClient> recordClient = boost::dynamic_pointer_cast<RecordClient>(getPtr());
-            ret = s_recordClientMsgDispatcher.dispatch(recordClient,message);
+            boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(m_id);
+            boost::shared_ptr<RecordClient> recordClient = boost::dynamic_pointer_cast<RecordClient>(client);
+            if(recordClient)
+            {
+                ret = s_recordClientMsgDispatcher.dispatch(recordClient,message);
+            }
         }
     }while(false);
     return ret;

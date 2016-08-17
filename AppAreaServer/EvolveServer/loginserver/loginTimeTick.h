@@ -19,6 +19,7 @@ class LoginTimeTick : public Thread , public Singleton<LoginTimeTick>
         TimeClock m_minClock;
         TimeClock m_hourClock;
         TimeClock m_halfHourClock;
+        TimeClock m_heartClock;
 };
 
 #endif

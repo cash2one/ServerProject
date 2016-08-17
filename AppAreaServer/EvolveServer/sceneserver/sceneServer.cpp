@@ -82,7 +82,8 @@ bool SceneServer::init()
         sceneInfo.set_id(m_id);
         sceneInfo.set_person(0);
         sceneInfo.set_status(ProtoMsgData::GS_Normal);
-        char temp[Flyer::msglen] = {0};
+        char temp[Flyer::msglen];
+        bzero(temp,sizeof(temp));
         sceneInfo.SerializeToArray(temp,Flyer::msglen);
         if(!redisMem->setSet("scene","idset",m_id))
         {
