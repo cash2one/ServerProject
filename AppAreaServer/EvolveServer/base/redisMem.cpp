@@ -13,14 +13,14 @@ RedisMem::~RedisMem()
 bool RedisMem::init()
 {
     //1.5秒超时
-    struct timeval timeout = { 1, 500000 };
+    struct timeval timeout = {1, 500000};
     disConnect();
     m_redis = redisConnectWithTimeout(m_host.c_str(),m_port,timeout);
     if(m_redis->err)
     {
-        char temp[100] = {0};
-        snprintf(temp,sizeof(temp),"[redis缓存] 初始化失败(%s,%u,%s)",m_host.c_str(),m_port,m_redis->errstr);
-        Error(Flyer::logger,temp);
+        std::ostringstream oss;
+        oss << "[redis缓存] 初始化失败(" << m_host << "," << m_port << "," << m_redis->errstr << ")";
+        Error(Flyer::logger,oss.str().c_str());
         redisFree(m_redis);
         m_redis = NULL;
         return false;
@@ -408,15 +408,10 @@ bool RedisMem::delSet(const char* table,const unsigned long key,const char *set)
         }
         if(set)
         {
-            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%lu]:%s",table,key,set);
+            m_reply = (redisReply*)redisCommand(m_redis,"SREM %s:%s %lu",table,set,key);
             break;
         }
-        if(key)
-        {
-            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%lu]",table,key);
-            break;
-        }
-        m_reply = (redisReply*)redisCommand(m_redis,"DEL %s",table);
+        m_reply = (redisReply*)redisCommand(m_redis,"SREM %s %lu",table,key);
     }while(false);
     return excelRetCheck();
 }
@@ -497,10 +492,10 @@ bool RedisMem::getSet(const char* table,const char *set,std::set<unsigned long> 
         }
         if(set)
         {
-            m_reply = (redisReply*)redisCommand(m_redis,"SMEMBERS %s:%s ",table,set);
+            m_reply = (redisReply*)redisCommand(m_redis,"SMEMBERS %s:%s",table,set);
             break;
         }
-        m_reply = (redisReply*)redisCommand(m_redis,"SMEMBERS %s ",table);
+        m_reply = (redisReply*)redisCommand(m_redis,"SMEMBERS %s",table);
     }while(false);
     if(isReplyOK())
     {
@@ -545,10 +540,10 @@ bool RedisMem::delSet(const char* table,const char *set)
         }
         if(set)
         {
-            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:%s",table,set);
+            m_reply = (redisReply*)redisCommand(m_redis,"SREM %s:[%s]",table,set);
             break;
         }
-        m_reply = (redisReply*)redisCommand(m_redis,"DEL %s",table);
+        m_reply = (redisReply*)redisCommand(m_redis,"SREM %s",table);
     }while(false);
     return excelRetCheck();
 }
@@ -665,7 +660,7 @@ unsigned int RedisMem::getBin(const char* table,const unsigned long key,char *va
             m_reply = (redisReply*)redisCommand(m_redis,"GET %s:[%lu]",table,key);
             break;
         }
-        m_reply = (redisReply*)redisCommand(m_redis,"SET %s ",table);
+        m_reply = (redisReply*)redisCommand(m_redis,"GET %s",table);
     }while(false);
 
     if(ret)
@@ -719,10 +714,10 @@ bool RedisMem::delBin(const char* table,const unsigned long key,const char *col)
         }
         if(key)
         {
-            m_reply = (redisReply*)redisCommand(m_redis,"SET %s:[%lu]",table,key);
+            m_reply = (redisReply*)redisCommand(m_redis,"DEL %s:[%lu]",table,key);
             break;
         }
-        m_reply = (redisReply*)redisCommand(m_redis,"SET %s",table);
+        m_reply = (redisReply*)redisCommand(m_redis,"DEL %s",table);
     }while(false);
     return excelRetCheck();
 }
@@ -745,10 +740,10 @@ unsigned int RedisMem::getBin(const char* table,const unsigned long key,const ch
         }
         if(key)
         {
-            m_reply = (redisReply*)redisCommand(m_redis,"SET %s:[%lu]",table,key);
+            m_reply = (redisReply*)redisCommand(m_redis,"GET %s:[%lu]",table,key);
             break;
         }
-        m_reply = (redisReply*)redisCommand(m_redis,"SET %s ",table);
+        m_reply = (redisReply*)redisCommand(m_redis,"GET %s ",table);
     }while(false);
 
     if(ret)

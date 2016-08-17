@@ -44,14 +44,14 @@ void LogicManager::loop()
         std::vector<std::string> delVec;
         for(auto iter = m_cmdMap.begin();iter != m_cmdMap.end();++iter)
         {
-            Debug(Flyer::logger,"[消息处理]开始(" << iter->first << "," << RobotTimeTick::getInstance().s_time.msec() << ")");
+            Debug(Flyer::logger,"[消息处理]开始(" << iter->first << "," << iter->second << "," << RobotTimeTick::getInstance().s_time.msec() << ")");
             bool ret = parseMsg(iter->first,iter->second);  
             iter->second -= 1;
             if(iter->second == 0)
             {
                 delVec.push_back(iter->first);
             }
-            Debug(Flyer::logger,"[消息处理]结束(" << iter->first <<  "," << ret << "," << RobotTimeTick::getInstance().s_time.msec() << ")");
+            Debug(Flyer::logger,"[消息处理]结束(" << iter->first <<  "," << iter->second << "," << ret << "," << RobotTimeTick::getInstance().s_time.msec() << ")");
         }
         for(auto iter = delVec.begin();iter != delVec.end();++iter)
         {

@@ -14,12 +14,12 @@ void RobotTimeTick::run()
     while(!isFinal())
     {
         s_time.now();
+        if(m_halfSecClock(s_time))
+        {
+            LogicManager::getInstance().loop();
+        }
         if(m_secClock(s_time))
         {
-            if(m_halfSecClock(s_time))
-            {
-                LogicManager::getInstance().loop();
-            }
             if(s_time.sec() % (60 * 60) == 0)
             {
                 char fileName[100] = {0};
@@ -27,6 +27,7 @@ void RobotTimeTick::run()
                 Flyer::changeLogger(fileName,s_time.sec());
             }
         }
+        ClientThread::getInstance().doCmd();
         msleep(atol(Flyer::globalConfMap["threadsleep"].c_str()));
     }
 }

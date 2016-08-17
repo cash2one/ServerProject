@@ -66,7 +66,7 @@ class MessageBuffer
         virtual ~MessageBuffer();
         unsigned char* beginWrite();
         void moveWritePos(unsigned int size);
-        bool adjustPos(unsigned int size = 1000);
+        bool adjustPos(unsigned int size = 500);
         unsigned int ableWriteSize();
         bool beginRead(MessageData *messageData);
 

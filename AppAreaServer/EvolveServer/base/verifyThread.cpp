@@ -20,6 +20,7 @@ bool VerifyThread::add(const unsigned long id)
         {
             break;
         }
+        task->resetLifeTime();
         task->setStatus(Task_Status_Verify);
         task->addEpoll(m_epfd,EPOLLIN | EPOLLOUT | EPOLLPRI | EPOLLERR);
         if(m_taskSet.size() > m_epollEventVec.size())
@@ -47,7 +48,7 @@ void VerifyThread::run()
                 do
                 {
                     boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(taskID);
-                    if(!task)
+                    if(!task || !task.get())
                     {
                         break;
                     }
@@ -57,19 +58,10 @@ void VerifyThread::run()
                     }
                     if(event.events & EPOLLIN)
                     {
-                        task->accpetMsg();
-#if 0
-                        if(task->getVerify())
+                        if(!task->acceptMsg())
                         {
-                            task->delEpoll(m_epfd,EPOLLIN);
-                            m_taskSet.erase(task->getID());
-                            task->resetLifeTime();
-                            if(!MainThread::getInstance().add(task->getID()))
-                            {
-                                delVec.push_back(task->getID());
-                            }
+                            break;
                         }
-#endif
                     }
                     if(event.events & EPOLLOUT)
                     {
@@ -93,7 +85,6 @@ void VerifyThread::run()
                 if(!task || task->isElapse())
                 {
                     delVec.push_back(*iter);
-                    continue;
                 }
             }
             for(auto iter = delVec.begin();iter != delVec.end();++iter)

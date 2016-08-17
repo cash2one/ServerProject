@@ -5,7 +5,7 @@
 #include "server.h"
 
 SuperClientMessageDispatcher SuperClient::s_dispatcher("管理服务器客户端消息处理器");
-SuperClient::SuperClient(Server *server) : Connect(-1),Thread("管理服务器客户端"),m_epfd(-1),m_server(server)
+SuperClient::SuperClient(Server *server) : Client("管理服务器客户端",Flyer::globalConfMap["superip"],atol(Flyer::globalConfMap["superport"].c_str()),-1),Thread("管理服务器客户端"),m_epfd(-1),m_server(server)
 {
 }
 
@@ -97,7 +97,10 @@ void SuperClient::run()
                 }
                 if(event.events & EPOLLIN)
                 {
-                    accpetMsg();
+                    if(!acceptMsg())
+                    {
+                        break;
+                    }
                 }
                 if(event.events & EPOLLOUT)
                 {
@@ -118,7 +121,13 @@ void SuperClient::run()
 
 MsgRet SuperClient::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    boost::shared_ptr<SuperClient> superClient = boost::dynamic_pointer_cast<SuperClient>(getPtr());
-    return s_dispatcher.dispatch(superClient,message);
+    MsgRet ret = MR_No_Register;
+    ret = Client::dispatcher(message);
+    if(ret == MR_No_Register)
+    {
+        boost::shared_ptr<SuperClient> superClient = boost::dynamic_pointer_cast<SuperClient>(getPtr());
+        ret = s_dispatcher.dispatch(superClient,message);
+    }
+    return ret;
 }
 

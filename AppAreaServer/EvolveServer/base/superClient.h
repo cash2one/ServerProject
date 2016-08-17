@@ -1,14 +1,14 @@
 #ifndef SUPER_CLIENT_H
 #define SUPER_CLIENT_H
 #include "head.h"
-#include "connect.h"
+#include "client.h"
 #include "singleton.h"
 #include "messageDispatcher.h"
 class Server;
 
 class SuperClient;
 typedef MessageDispatcher<boost::shared_ptr<SuperClient> > SuperClientMessageDispatcher;
-class SuperClient : public Connect,public Thread 
+class SuperClient : public Client,public Thread 
 {
     public:
         SuperClient(Server *server);

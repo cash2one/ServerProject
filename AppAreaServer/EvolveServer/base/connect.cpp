@@ -4,11 +4,17 @@
 #include "parseMessage.h"
 #include "construct.h"
 #include "system.pb.h"
+#include "mainThread.h"
 
 unsigned long Connect::s_tempid = 0;
 ConnectMessageDispatcher Connect::s_connectMsgDispatcher("连接消息处理器");
 Connect::Connect(const int socket) : m_socket(socket),m_id(++s_tempid),m_status(Task_Status_Close),m_lifeTime(),m_serverID(0),m_verify(false),m_serverType(ProtoMsgData::ST_Client),m_heartTime()
 {
+}
+
+int Connect::getSocket()
+{
+    return m_socket;
 }
 
 boost::shared_ptr<Connect> Connect::getPtr()
@@ -32,31 +38,37 @@ void Connect::delEpoll(const int epfd,const unsigned long events)
     epoll_ctl(epfd,EPOLL_CTL_DEL,m_socket,&event);
 }
 
-bool Connect::accpetMsg()
+bool Connect::acceptMsg()
 {
     bool ret = false;
     do
     {
         if(!m_messageBuffer.adjustPos())
         {
+            Info(Flyer::logger,"[接收消息失败] (缓存不足," << m_id << ")");
             break;
         }
         unsigned int len = recv(m_socket,m_messageBuffer.beginWrite(),m_messageBuffer.ableWriteSize(),0);
         if(len == 0)
         {
+            Info(Flyer::logger,"[接收消息失败] (零个字节," << m_id << ")");
             break;
         }
         else if(len < 0)
         {
             if(errno == EINTR || errno == EWOULDBLOCK || errno == EAGAIN)
             {
-                break;
+                ret = true;
             }
-            ret = true;
+            else
+            {
+                Info(Flyer::logger,"[接收消息失败] (套接字出错," << m_id << ")");
+            }
             break;
         }
         m_messageBuffer.moveWritePos(len);
-        unsigned char buffer[atol(Flyer::globalConfMap["datasize"].c_str())] = {0};
+        unsigned char buffer[atol(Flyer::globalConfMap["datasize"].c_str())];
+        bzero(buffer,sizeof(buffer));
 
         //这里用new MessageData析构会出问题
         MessageData *messageData = (MessageData*)buffer;
@@ -69,7 +81,7 @@ bool Connect::accpetMsg()
                 continue;
             }
             std::string protoName = message->GetTypeName();
-            if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
+            //if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
             {
                 Debug(Flyer::logger,"接受消息(" << m_id << "," << message->GetTypeName() << ")");
             }
@@ -78,7 +90,7 @@ bool Connect::accpetMsg()
             {
                 flg = this->dispatcher(message);
             }
-            if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
+            //if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
             {
                 Debug(Flyer::logger,"处理消息(" << m_id << "," << message->GetTypeName() << "," << flg << ")");
             }
@@ -153,7 +165,7 @@ bool Connect::sendMsg(const google::protobuf::Message &message)
     encodeMessage(&message,ret);
     bool flg = send(m_socket,ret.c_str(),ret.size(),0);
     std::string protoName = message.GetTypeName();
-    if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
+    //if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
     {
         Debug(Flyer::logger,"发送消息(" << m_id << "," << message.GetTypeName() << "," << flg << ")");
     }
@@ -232,25 +244,29 @@ bool Connect::sendHeartMsg()
     bool ret = true;
     do
     {
+        if(getStatus() != Task_Status_Main)
+        {
+            break;
+        }
         if(isHeartElapse())
         {
             ret = false;
             break;
         }
         ProtoMsgData::ReqHeartBeat reqMsg;
-        sendMsg(reqMsg);
-        resetHeartTime();
+        ret = sendMsg(reqMsg);
     }while(false);
     if(!ret)
     {
-        setStatus(Task_Status_Recycle);
+        MainThread::getInstance().addRecycle(m_id);
+        Info(Flyer::logger,"[心跳包超时] (" << m_id << ")");
     }
     return ret;
 }
 
 MsgRet Connect::baseDispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    MsgRet ret = MR_False;
+    MsgRet ret = MR_No_Register;
     do
     {
         ret = s_connectMsgDispatcher.dispatch(getPtr(),message);

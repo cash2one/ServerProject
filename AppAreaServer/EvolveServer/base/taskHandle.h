@@ -10,6 +10,8 @@ class TaskHandle : public MessageHandle
         TaskHandle();
         ~TaskHandle();
         virtual bool init();
+    public:
+        static bool ackHeartBeat(boost::shared_ptr<Task> task,const boost::shared_ptr<ProtoMsgData::AckHeartBeat> message);
 };
 
 #endif

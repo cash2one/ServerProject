@@ -4,8 +4,9 @@
 #include "thread.h"
 #include "taskQueue.h"
 #include "client.h"
+//不能用线程来做服务器与服务器之间的交互
 
-class ClientThread : public Thread,public TaskQueue,public Singleton<ClientThread>
+class ClientThread : public TaskQueue,public Singleton<ClientThread>
 {
     private:
         std::set<unsigned long> m_clientSet;
@@ -16,8 +17,8 @@ class ClientThread : public Thread,public TaskQueue,public Singleton<ClientThrea
         ClientThread();
         ~ClientThread();
     public:
+        void doCmd();
         virtual bool add(const unsigned long id);
-        virtual void run();
         bool init();
         void addRecycle(const unsigned long id);
 

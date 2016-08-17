@@ -29,7 +29,7 @@ void RecycleThread::run()
             for(auto iter = m_taskSet.begin();iter != m_taskSet.end();++iter)
             {
                 boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(*iter);
-                if(task)
+                if(task && task.get() && task->getSocket() != -1)
                 {
                     task->closeFd();
                     TaskManager::getInstance().eraseTask(*iter);
@@ -37,7 +37,7 @@ void RecycleThread::run()
                 else
                 {
                     boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(*iter);
-                    if(client)
+                    if(client && client.get())
                     {
                         client->closeFd();
                         ClientManager::getInstance().eraseClient(*iter);
@@ -61,7 +61,7 @@ void RecycleThread::run()
             boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(*iter);
             if(client)
             {
-                task->closeFd();
+                client->closeFd();
                 ClientManager::getInstance().eraseClient(*iter);
             }
         }

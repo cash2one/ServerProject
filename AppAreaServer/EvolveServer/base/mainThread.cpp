@@ -18,6 +18,7 @@ bool MainThread::add(const unsigned long id)
         {
             break;
         }
+        task->resetHeartTime();
         task->setStatus(Task_Status_Main);
         task->addEpoll(m_epfd,EPOLLIN | EPOLLOUT | EPOLLPRI | EPOLLERR);
         if(m_taskSet.size() > m_epollEventVec.size())
@@ -45,7 +46,7 @@ void MainThread::run()
                 do
                 {
                     boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(taskID);
-                    if(!task)
+                    if(!task || !task.get())
                     {
                         break;
                     }
@@ -59,7 +60,10 @@ void MainThread::run()
                     }
                     if(event.events & EPOLLIN)
                     {
-                        task->accpetMsg();
+                        if(!task->acceptMsg())
+                        {
+                            break;
+                        }
                     }
                     if(event.events & EPOLLOUT)
                     {

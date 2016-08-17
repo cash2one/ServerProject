@@ -11,9 +11,11 @@ class ConnectHandle : public MessageHandle
         ~ConnectHandle();
         virtual bool init();
     public:
+#if 0
         static bool ackVerifyServer(boost::shared_ptr<Connect> connect,const boost::shared_ptr<ProtoMsgData::AckVerifyServer> message);
         static bool reqHeartBeat(boost::shared_ptr<Connect> connect,const boost::shared_ptr<ProtoMsgData::ReqHeartBeat> message);
         static bool ackHeartBeat(boost::shared_ptr<Connect> connect,const boost::shared_ptr<ProtoMsgData::AckHeartBeat> message);
+#endif
 };
 
 #endif

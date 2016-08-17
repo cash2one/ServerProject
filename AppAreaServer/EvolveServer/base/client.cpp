@@ -1,6 +1,7 @@
 #include "client.h"
 #include "flyer.h"
 #include "clientManager.h"
+#include "superClient.h"
 
 ClientMessageDispatcher Client::s_clientMsgDispatcher("客户端消息处理器");
 
@@ -67,13 +68,22 @@ bool Client::connectOwner(int &fd,const std::string &ip,const unsigned short por
 
 MsgRet Client::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    MsgRet ret = MR_False;
+    MsgRet ret = MR_No_Register;
     do
     {
-        boost::shared_ptr<Client> client = boost::dynamic_pointer_cast<Client>(getPtr());
+        boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(m_id);
         if(client)
         {
             ret = s_clientMsgDispatcher.dispatch(client,message);
+        }
+        else
+        {
+            client = boost::dynamic_pointer_cast<SuperClient>(getPtr());
+            boost::shared_ptr<SuperClient> superClient = boost::dynamic_pointer_cast<SuperClient>(client);
+            if(superClient)
+            {
+                ret = s_clientMsgDispatcher.dispatch(client,message);
+            }
         }
     }while(false);
     return ret;
