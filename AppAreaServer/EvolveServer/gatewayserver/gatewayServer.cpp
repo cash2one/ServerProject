@@ -92,7 +92,8 @@ bool GatewayServer::init()
         gateInfo.set_port(m_port);
         gateInfo.set_person(0);
         gateInfo.set_status(ProtoMsgData::GS_Normal);
-        char temp[Flyer::msglen] = {0};
+        char temp[Flyer::msglen];
+        bzero(temp,sizeof(temp));
         gateInfo.SerializeToArray(temp,Flyer::msglen);
         if(!redisMem->setSet("gateway","idset",m_id))
         {
@@ -160,7 +161,7 @@ bool GatewayServer::acceptConnect(const int socket,const int listenFd)
         task->setServerType(ProtoMsgData::ST_Client);
         ret = VerifyThread::getInstance().add(task->getID());
     }
-    else
+    if(!ret)
     {
         RecycleThread::getInstance().add(task->getID());
     }

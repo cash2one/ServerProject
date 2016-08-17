@@ -92,7 +92,7 @@ bool MessageBuffer::adjustPos(unsigned int size)
 {
     bool adjust = s_MessageBufferMax - m_writePos < m_readPos ? true : false;
     adjust = adjust ? true : (s_MessageBufferMax - m_writePos < size ?  true : false);
-    if(adjust)
+    if(adjust && m_readPos)
     {
         pthread_mutex_lock(&m_mutex);
         memmove(&m_buffer[0],&m_buffer[m_readPos],m_writePos - m_readPos);

@@ -50,8 +50,13 @@ void TaskManager::eraseTask(const unsigned long taskID)
 
 boost::shared_ptr<Task> TaskManager::getTask(const unsigned long id)
 {
+    boost::shared_ptr<Task> ret(NULL);
     auto iter = m_taskMap.find(id);
-    return iter == m_taskMap.end() ? boost::shared_ptr<Task>(NULL) : iter->second;
+    if(iter != m_taskMap.end())
+    {
+        ret = iter->second;
+    }
+    return ret;
 }
 
 bool TaskManager::sendServerMsg(const unsigned int serverID,const google::protobuf::Message &message)
@@ -80,12 +85,17 @@ boost::shared_ptr<Task> TaskManager::getServerTask(const unsigned int serverID)
     return boost::shared_ptr<Task>(NULL);
 }
 
-void TaskManager::sendHeartMsg()
+void TaskManager::sendHeartMsg(const unsigned cycle)
 {
+    unsigned int cycleTotal = atol(Flyer::globalConfMap["heartcycle"].c_str());
     std::vector<unsigned long> delVec;
     for(auto iter = m_taskMap.begin();iter != m_taskMap.end();++iter)
     {
         boost::shared_ptr<Task> task = iter->second;
+        if(task->getID() % cycleTotal != cycle)
+        {
+            continue;
+        }
         if(!task->sendHeartMsg())
         {
             delVec.push_back(task->getID());

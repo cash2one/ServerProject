@@ -16,14 +16,18 @@ SceneClient::~SceneClient()
 
 MsgRet SceneClient::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    MsgRet ret = MR_False;
+    MsgRet ret = MR_No_Register;
     do
     {
         ret = Client::dispatcher(message);
         if(ret == MR_No_Register)
         {
-            boost::shared_ptr<SceneClient> sceneClient = boost::dynamic_pointer_cast<SceneClient>(getPtr());
-            ret = s_sceneClientMsgDispatcher.dispatch(sceneClient,message);
+            boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(m_id);
+            boost::shared_ptr<SceneClient> sceneClient = boost::dynamic_pointer_cast<SceneClient>(client);
+            if(sceneClient)
+            {
+                ret = s_sceneClientMsgDispatcher.dispatch(sceneClient,message);
+            }
         }
     }while(false);
     return ret;

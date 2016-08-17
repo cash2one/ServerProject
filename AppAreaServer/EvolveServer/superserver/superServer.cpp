@@ -140,12 +140,8 @@ void SuperServer::verifyOtherNotify(const ProtoMsgData::ServerType &serverType)
         const ProtoMsgData::ServerInfo &serverInfo = iter->second;
         if(serverInfo.status() == ProtoMsgData::ST_Wait && serverInfo.servertype() > serverType)
         {
-            boost::shared_ptr<Connect> connect = TaskManager::getInstance().getServerTask(serverInfo.id());
-            if(!connect)
-            {
-                continue;
-            }
-            boost::shared_ptr<SuperTask> superTask = boost::dynamic_pointer_cast<SuperTask>(connect);
+            boost::shared_ptr<Task> task = TaskManager::getInstance().getServerTask(serverInfo.id());
+            boost::shared_ptr<SuperTask> superTask = boost::dynamic_pointer_cast<SuperTask>(task);
             if(superTask)
             {
                 superTask->verify(serverInfo.servertype());

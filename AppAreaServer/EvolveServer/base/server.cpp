@@ -99,13 +99,20 @@ bool Server::init()
         }
         MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ConnectHandle>(new ConnectHandle()));
         MessageHandleManager::getInstance().addHandle(boost::shared_ptr<TaskHandle>(new TaskHandle()));
-        if(m_type != ProtoMsgData::ST_Login && m_type != ProtoMsgData::ST_Record)
+        if(m_type != ProtoMsgData::ST_Login)
         {
             MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ClientHandle>(new ClientHandle()));
         }
         if(!loadConf())
         {
             break;
+        }
+        if(m_type != ProtoMsgData::ST_Login && m_type != ProtoMsgData::ST_Record)
+        {
+            if(!ClientThread::getInstance().init())
+            {
+                break;
+            }
         }
         if(!RedisMemManager::getInstance().init())
         {
@@ -212,7 +219,14 @@ void Server::serverCallBack()
     accept(socketMap);
     for(auto iter = socketMap.begin();iter != socketMap.end();++iter)
     {
-        acceptConnect(iter->first,iter->second);
+        if(iter->first == -1)
+        {
+            Error(Flyer::logger,"[接收错误](套接字为负数)");
+        }
+        else
+        {
+            acceptConnect(iter->first,iter->second);
+        }
     }
     socketMap.clear();
     return ;
@@ -338,10 +352,6 @@ void Server::startThread()
     RecycleThread::getInstance().start();
     VerifyThread::getInstance().start();
     MainThread::getInstance().start();
-    if(m_type != ProtoMsgData::ST_Login && m_type != ProtoMsgData::ST_Record)
-    {
-        ClientThread::getInstance().start();
-    }
 }
 
 void Server::endThread()
@@ -358,12 +368,6 @@ void Server::endThread()
 
     MainThread::getInstance().final();
     MainThread::getInstance().end();
-
-    if(m_type != ProtoMsgData::ST_Login && m_type != ProtoMsgData::ST_Record)
-    {
-        ClientThread::getInstance().final();
-        ClientThread::getInstance().end();
-    }
      
     RecycleThread::getInstance().final();
     RecycleThread::getInstance().end();

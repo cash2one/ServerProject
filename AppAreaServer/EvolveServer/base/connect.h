@@ -43,6 +43,7 @@ class Connect : private DisCopy , public boost::enable_shared_from_this<Connect>
     public:
         boost::shared_ptr<Connect> getPtr();
         Connect(const int socket);
+        int getSocket();
         virtual ~Connect()
         {
             char temp[100] = {0};
@@ -92,7 +93,7 @@ class Connect : private DisCopy , public boost::enable_shared_from_this<Connect>
         }
         void addEpoll(const int epfd,const unsigned long event); 
         void delEpoll(const int epfd,const unsigned long events);
-        bool accpetMsg();
+        bool acceptMsg();
         void closeFd();
         void doAcceptMessage();
         bool randTestDB();

@@ -18,6 +18,7 @@ class GatewayTimeTick : public Thread , public Singleton<GatewayTimeTick>
         TimeClock m_minClock;
         TimeClock m_hourClock;
         TimeClock m_halfHourClock;
+        TimeClock m_heartClock;
 };
 
 #endif

@@ -8,6 +8,7 @@
 #include "recycleThread.h"
 #include "gatewayServer.h"
 #include "sceneClient.h"
+#include "serialize.pb.h"
 
 GatewayMessageDispatcher GatewayTask::s_gatewayMsgDispatcher("网关服务器消息处理器");
 GatewayTask::GatewayTask(const int fd) : Task(fd),m_charID(0),m_isLogin(false),m_sceneID(0)
@@ -20,16 +21,20 @@ GatewayTask::~GatewayTask()
 
 MsgRet GatewayTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    MsgRet ret = MR_False;
+    MsgRet ret = MR_No_Register;
     ret = Task::dispatcher(message);
     if(ret == MR_No_Register)
     {
-        boost::shared_ptr<GatewayTask> task = boost::dynamic_pointer_cast<GatewayTask>(getPtr());
-        MsgRet ret = s_gatewayMsgDispatcher.dispatch(task,message);
+        boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(m_id);
+        boost::shared_ptr<GatewayTask> gatewayTask = boost::dynamic_pointer_cast<GatewayTask>(task);
+        if(gatewayTask)
+        {
+            ret = s_gatewayMsgDispatcher.dispatch(gatewayTask,message);
+        }
         if(ret == MR_No_Register)
         {
             bool flg = false;
-            boost::shared_ptr<Client> client = ClientManager::getInstance().getServerClient(task->getSceneID());
+            boost::shared_ptr<Client> client = ClientManager::getInstance().getServerClient(gatewayTask->getSceneID());
             boost::shared_ptr<SceneClient> sceneClient = boost::dynamic_pointer_cast<SceneClient>(client);
             if(sceneClient)
             {
@@ -84,6 +89,7 @@ bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> 
         {
             break;
         }
+        m_phone = message->phone();
         unsigned long charID = redisMem->getInt("charid",message->phone().c_str());
         if(!charID)
         {
@@ -95,9 +101,9 @@ bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> 
             {
                 break;
             }
-            char temp[100] = {0};
-            snprintf(temp,sizeof(temp),"[登录网关(请求新建角色)] (%s,%lu)",message->phone().c_str(),getID());
-            Debug(Flyer::logger,temp);
+            std::ostringstream oss;
+            oss << "[登录网关(请求新建角色)] (" << message->phone() << "," << getID() << ")";
+            Debug(Flyer::logger,oss.str().c_str());
             client->sendMsg(reqMsg);
 
         }
@@ -114,7 +120,8 @@ bool GatewayTask::loginGateway(boost::shared_ptr<ProtoMsgData::ReqLoginGateway> 
         {
             break;
         }
-        char temp[Flyer::msglen] = {0};
+        char temp[Flyer::msglen];
+        bzero(temp,sizeof(temp));
         unsigned int size = redisMem->getBin("gateway",serverID,temp);
         ProtoMsgData::GatewayInfo gateInfo;
         try
@@ -178,7 +185,8 @@ bool GatewayTask::loginScene()
             {
                 break;
             }
-            char temp[Flyer::msglen] = {0};
+            char temp[Flyer::msglen];
+            bzero(temp,sizeof(temp));
             unsigned size = redisMem->getBin("scene",*iter,temp);
             ProtoMsgData::SceneInfo sceneInfo;
             try
@@ -245,6 +253,27 @@ bool GatewayTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> m
         {
             break;
         }
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis(m_charID);
+        if(!redisMem)
+        {
+            break;
+        }
+        char buffer[Flyer::msglen];
+        bzero(buffer,sizeof(buffer));
+        unsigned int size = redisMem->getBin("userbinary",m_charID,buffer);
+        if(!size)
+        {
+            break;
+        }
+        ProtoMsgData::UserBinary binary;
+        try
+        {
+            binary.ParseFromArray(buffer,size);
+        }
+        catch(...)
+        {
+            break;
+        }
         ret = true;
     }while(false);
 
@@ -253,7 +282,7 @@ bool GatewayTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> m
     sendMsg(ackMsg);
     if(!ret)
     {
-        RecycleThread::getInstance().add(getID());
+        VerifyThread::getInstance().addRecycle(getID());
     }
     else
     {

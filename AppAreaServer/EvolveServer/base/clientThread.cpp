@@ -1,8 +1,9 @@
 #include "clientManager.h"
 #include "recycleThread.h"
 #include "clientThread.h"
+#include "flyer.h"
 
-ClientThread::ClientThread() : Thread("客户端管理器")
+ClientThread::ClientThread()
 {
     init();
 }
@@ -43,62 +44,56 @@ bool ClientThread::add(const unsigned long id)
     return flag;
 }
 
-void ClientThread::run()
+void ClientThread::doCmd()
 {
-    while(!isFinal())
+    checkQueue();
+    if(!m_clientSet.empty())
     {
-        checkQueue();
-        if(!m_clientSet.empty())
+        std::vector<unsigned long> delVec;
+        int ret = epoll_wait(m_epfd,&m_eventVec[0],m_clientSet.size(),0);
+        for(int cnt = 0;cnt < ret;++cnt)
         {
-            std::vector<unsigned long> delVec;
-            int ret = epoll_wait(m_epfd,&m_eventVec[0],m_clientSet.size(),0);
-            for(int cnt = 0;cnt < ret;++cnt)
+            struct epoll_event &event = m_eventVec[cnt];
+            bool delFlg = true;
+            do
             {
-                struct epoll_event &event = m_eventVec[cnt];
-                bool delFlg = true;
-                do
+                boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(event.data.u64);
+                if(!client || !client.get())
                 {
-                    boost::shared_ptr<Client> client = ClientManager::getInstance().getClient(event.data.u64);
-                    if(!client)
-                    {
-                        break;
-                    }
-                    if(event.events & EPOLLPRI)
-                    {
-                        break;
-                    }
-                    if(event.events & EPOLLERR)
-                    {
-                        break;
-                    }
-                    if(event.events & EPOLLIN)
-                    {
-                        client->accpetMsg();
-                    }
-                    if(event.events & EPOLLOUT)
-                    {
-                    }
-                    delFlg = false;
-                }while(false);
-                if(delFlg)
-                {
-                    delVec.push_back(event.data.u64);
+                    break;
                 }
-                event.events = 0;
-            }
-            for(auto iter = delVec.begin();iter != delVec.end();++iter)
+                if(event.events & EPOLLPRI)
+                {
+                    break;
+                }
+                if(event.events & EPOLLERR)
+                {
+                    break;
+                }
+                if(event.events & EPOLLIN)
+                {
+                    if(!client->acceptMsg())
+                    {
+                        break;
+                    }
+                }
+                if(event.events & EPOLLOUT)
+                {
+                }
+                delFlg = false;
+            }while(false);
+            if(delFlg)
             {
-                addRecycle(*iter);
+                Info(Flyer::logger,"[客户端被中断](" << event.data.u64 << ")");
+                delVec.push_back(event.data.u64);
             }
+            event.events = 0;
         }
-        msleep(atol(Flyer::globalConfMap["threadsleep"].c_str()));
+        for(auto iter = delVec.begin();iter != delVec.end();++iter)
+        {
+            addRecycle(*iter);
+        }
     }
-
-    for(auto iter = m_clientSet.begin();iter != m_clientSet.end();++iter)
-    {
-        addRecycle(*iter);
-    }
-    m_clientSet.clear();
 }
 
 void ClientThread::addRecycle(const unsigned long id)

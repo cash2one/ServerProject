@@ -25,7 +25,7 @@ class TaskManager : public Singleton<TaskManager>
         void randOpDB(const unsigned long cnt);
         bool sendServerMsg(const unsigned int serverID,const google::protobuf::Message &message);
         boost::shared_ptr<Task> getServerTask(const unsigned int serverID);
-        void sendHeartMsg();
+        void sendHeartMsg(const unsigned cycle);
         bool addGatewayTask(const unsigned charID,const unsigned long id);
         boost::shared_ptr<Task> getGatewayTask(const unsigned charID);
     private:

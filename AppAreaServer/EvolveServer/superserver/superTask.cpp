@@ -15,12 +15,16 @@ SuperTask::~SuperTask()
 
 MsgRet SuperTask::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    MsgRet ret = MR_False;
+    MsgRet ret = MR_No_Register;
     ret = Task::dispatcher(message);
     if(ret == MR_No_Register)
     {
-        boost::shared_ptr<SuperTask> task = boost::dynamic_pointer_cast<SuperTask>(getPtr());
-        ret = s_superMsgDispatcher.dispatch(task,message);
+        boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(m_id);
+        boost::shared_ptr<SuperTask> superTask = boost::dynamic_pointer_cast<SuperTask>(task);
+        if(superTask)
+        {
+            ret = s_superMsgDispatcher.dispatch(superTask,message);
+        }
     }
     return ret;
 }
@@ -252,9 +256,12 @@ bool SuperTask::verify(const ProtoMsgData::ServerType &serverType)
     bool ret = false;
     do
     {
-        if(!verifyIp(serverType))
+        if(!m_serverID)
         {
-            break;
+            if(!verifyIp(serverType))
+            {
+                break;
+            }
         }
         if(!getDependMap(serverType))
         {

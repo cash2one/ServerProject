@@ -12,7 +12,7 @@ LoginClient::~LoginClient()
 
 MsgRet LoginClient::dispatcher(boost::shared_ptr<google::protobuf::Message> message)
 {
-    MsgRet ret = MR_False;
+    MsgRet ret = MR_No_Register;
     do
     {
         ret = Client::dispatcher(message);

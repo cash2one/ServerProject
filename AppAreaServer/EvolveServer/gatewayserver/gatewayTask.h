@@ -32,5 +32,6 @@ class GatewayTask : public Task
         unsigned long m_charID;
         bool m_isLogin;
         unsigned int m_sceneID;
+        std::string m_phone;
 };
 #endif
