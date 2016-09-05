@@ -73,7 +73,7 @@ bool Connect::acceptMsg()
         //这里用new MessageData析构会出问题
         MessageData *messageData = (MessageData*)buffer;
         constructInBuffer(messageData);
-        while(m_messageBuffer.beginRead(messageData))
+        while(messageData && m_messageBuffer.beginRead(messageData))
         {
             boost::shared_ptr<google::protobuf::Message> message = decodeMessage(messageData);
             if(!message)
@@ -81,7 +81,7 @@ bool Connect::acceptMsg()
                 continue;
             }
             std::string protoName = message->GetTypeName();
-            //if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
+            if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
             {
                 Debug(Flyer::logger,"接受消息(" << m_id << "," << message->GetTypeName() << ")");
             }
@@ -90,7 +90,7 @@ bool Connect::acceptMsg()
             {
                 flg = this->dispatcher(message);
             }
-            //if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
+            if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
             {
                 Debug(Flyer::logger,"处理消息(" << m_id << "," << message->GetTypeName() << "," << flg << ")");
             }
@@ -165,7 +165,7 @@ bool Connect::sendMsg(const google::protobuf::Message &message)
     encodeMessage(&message,ret);
     bool flg = send(m_socket,ret.c_str(),ret.size(),0);
     std::string protoName = message.GetTypeName();
-    //if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
+    if(protoName.compare("ProtoMsgData.ReqHeartBeat") && protoName.compare("ProtoMsgData.AckHeartBeat"))
     {
         Debug(Flyer::logger,"发送消息(" << m_id << "," << message.GetTypeName() << "," << flg << ")");
     }

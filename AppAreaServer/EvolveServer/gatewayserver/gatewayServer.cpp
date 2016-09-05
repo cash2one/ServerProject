@@ -177,7 +177,7 @@ int main()
     Flyer::setLogger("log/gateway.log");
     if(GatewayServer::getInstance().init())
     {
-        Info(Flyer::logger,"[管理服务器] 启动成功");
+        Info(Flyer::logger,"[网关服务器] 启动成功");
         GatewayServer::getInstance().main();
     }
     google::protobuf::ShutdownProtobufLibrary();

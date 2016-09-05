@@ -15,6 +15,10 @@ void GatewayTimeTick::run()
     unsigned int cycleTtotal = atol(Flyer::globalConfMap["heartcycle"].c_str());
     while(!isFinal())
     {
+#if 0
+        time_t begin,end;
+        time(&begin);
+#endif
         s_time.now();
         if(m_secClock(s_time))
         {
@@ -32,6 +36,10 @@ void GatewayTimeTick::run()
             cycle %= cycleTtotal; 
         }
         ClientThread::getInstance().doCmd();
+#if 0
+        time(&end);
+        Info(Flyer::logger,"[处理时间](" << (unsigned int)begin << "," << (unsigned int)end << "," << (unsigned int)(end - begin) << ")");
+#endif
         msleep(atol(Flyer::globalConfMap["threadsleep"].c_str()));
     }
 }
