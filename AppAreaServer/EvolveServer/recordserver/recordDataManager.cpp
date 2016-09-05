@@ -243,6 +243,12 @@ bool RecordDataManager::createUser(const std::string &phone,unsigned long &charI
         {
             break;
         }
+        unsigned long getCharID = redisMem->getInt("charid",binary.phone().c_str());
+        if(binary.charid() != getCharID)
+        {
+            Debug(Flyer::logger,"[redis取错误](" << getCharID << "," << binary.charid() << "," << binary.phone() << ")");
+            break;
+        }
         charID = binary.charid();
         ret = true;
     }while(false);

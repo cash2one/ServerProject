@@ -10,6 +10,8 @@ class LoginHandle : public MessageHandle
         LoginHandle();
         ~LoginHandle();
         virtual bool init();
+    public:
+        static bool reqCreateUser(boost::shared_ptr<LoginClient> client,boost::shared_ptr<ProtoMsgData::ReqCreateUser> message);
 };
 
 #endif

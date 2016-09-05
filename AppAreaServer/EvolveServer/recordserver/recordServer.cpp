@@ -9,6 +9,7 @@
 #include "recycleThread.h"
 #include "verifyThread.h"
 #include "recordDataManager.h"
+#include "serverHandle.h"
 
 static void ctrlHandler(int signal)
 {
@@ -47,6 +48,7 @@ bool RecordServer::init()
         {
             break;
         }
+        MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ServerHandle>(new ServerHandle()));
         MessageHandleManager::getInstance().addHandle(boost::shared_ptr<RecordHandle>(new RecordHandle()));
         if(!MessageHandleManager::getInstance().init())
         {
@@ -116,19 +118,22 @@ void RecordServer::endServerThread()
 bool RecordServer::acceptConnect(const int socket,const int listenPort)
 {
     bool ret = false;
-    if(listenPort != m_port)
+    do
     {
-        return ret;
-    }
-    boost::shared_ptr<RecordTask> task(new RecordTask(socket));
-    if(TaskManager::getInstance().addTask(task))
-    {
-        ret = VerifyThread::getInstance().add(task->getID());
-    }
-    if(!ret)
-    {
-        RecycleThread::getInstance().add(task->getID());
-    }
+        if(listenPort != m_port)
+        {
+            break;
+        }
+        boost::shared_ptr<RecordTask> task(new RecordTask(socket));
+        if(TaskManager::getInstance().addTask(task))
+        {
+            ret = VerifyThread::getInstance().add(task->getID());
+        }
+        if(!ret)
+        {
+            RecycleThread::getInstance().add(task->getID());
+        }
+    }while(false);
     return ret;
 }
 

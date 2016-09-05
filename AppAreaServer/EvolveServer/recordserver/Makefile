@@ -11,7 +11,9 @@ src = recordServer.cpp\
 	  recordTimeTick.cpp\
 	  recordTask.cpp\
 	  recordHandle.cpp\
-	  recordDataManager.cpp
+	  recordDataManager.cpp\
+	  serverHandle.cpp\
+	  serverDispatcher.cpp
 
 object = $(patsubst %.cpp,%.o,$(src))
 depend = $(patsubst %.cpp,%.d,$(src))

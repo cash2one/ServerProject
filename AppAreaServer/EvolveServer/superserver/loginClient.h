@@ -13,6 +13,9 @@ class LoginClient : public Client
         virtual MsgRet dispatcher(boost::shared_ptr<google::protobuf::Message> message);
     public:
         static LoginClientMessageDispatcher s_loginClientMsgDispatcher;
+    public:
+        bool reqCreateUser(boost::shared_ptr<ProtoMsgData::ReqCreateUser> message);
+        bool ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> message);
 };
 
 #endif

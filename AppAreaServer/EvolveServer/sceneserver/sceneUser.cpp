@@ -25,6 +25,7 @@ bool SceneUser::parseFromBinary(const ProtoMsgData::UserBinary &binary)
     {
         if(binary.charid() != m_charID)
         {
+            Debug(Flyer::logger,"[登陆场景] 错误(" << binary.charid() << "," << m_charID << ")");
             break;
         }
         m_phone = binary.phone();
