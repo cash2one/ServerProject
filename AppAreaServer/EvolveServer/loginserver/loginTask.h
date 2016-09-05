@@ -15,7 +15,14 @@ class LoginTask : public Task
         virtual MsgRet dispatcher(boost::shared_ptr<google::protobuf::Message> message);
         bool registerAccount(boost::shared_ptr<ProtoMsgData::ReqRegister> message);
         bool getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> message);
+        bool ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> message);
+    private:
+        bool createUser(const std::string phone);
+        bool findGateway(const std::string &phone,ProtoMsgData::AckGateway &ackMsg);
+        bool hasCreateUser(const std::string phone);
     public:
         static LoginMessageDispatcher s_loginMsgDispatcher;
+    private:
+        unsigned long m_charID;
 };
 #endif

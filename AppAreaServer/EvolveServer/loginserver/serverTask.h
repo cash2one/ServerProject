@@ -14,6 +14,7 @@ class ServerTask : public Task
     public:
         virtual MsgRet dispatcher(boost::shared_ptr<google::protobuf::Message> message);
         bool verify(const ProtoMsgData::ServerInfo &serverInfo);
+        bool ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> message);
     public:
         static ServerMessageDispatcher s_serverMsgDispatcher;
 };

@@ -85,6 +85,20 @@ boost::shared_ptr<Task> TaskManager::getServerTask(const unsigned int serverID)
     return boost::shared_ptr<Task>(NULL);
 }
 
+boost::shared_ptr<Task> TaskManager::getServerTaskByType(const ProtoMsgData::ServerType type)
+{
+    for(auto iter = m_taskMap.begin();iter != m_taskMap.end();++iter)
+    {
+        boost::shared_ptr<Task> task = iter->second;
+        if(task->getServerType() == type)
+        {
+            return task;
+        }
+    }
+    return boost::shared_ptr<Task>(NULL);
+}
+
+
 void TaskManager::sendHeartMsg(const unsigned cycle)
 {
     unsigned int cycleTotal = atol(Flyer::globalConfMap["heartcycle"].c_str());

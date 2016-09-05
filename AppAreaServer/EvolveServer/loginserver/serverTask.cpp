@@ -3,6 +3,7 @@
 #include "mysqlPool.h"
 #include "loginServer.h"
 #include "taskManager.h"
+#include "loginTask.h"
 
 ServerMessageDispatcher ServerTask::s_serverMsgDispatcher("登陆服务器消息处理器");
 
@@ -78,4 +79,19 @@ bool ServerTask::verify(const ProtoMsgData::ServerInfo &serverInfo)
     return ret;
 }
 
+bool ServerTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> message)
+{
+    bool ret = false;
+    do
+    {
+        boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(message->id());
+        boost::shared_ptr<LoginTask> loginTask = boost::dynamic_pointer_cast<LoginTask>(task);
+        if(!loginTask)
+        {
+            break;
+        }
+        ret = loginTask->ackCreateUser(message);
+    }while(false);
+    return ret;
+}
 

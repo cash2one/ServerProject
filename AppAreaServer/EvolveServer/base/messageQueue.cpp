@@ -44,13 +44,13 @@ MessageBuffer::~MessageBuffer()
 bool MessageBuffer::beginRead(MessageData *messageData)
 {
     bool ret = false;
+    pthread_mutex_lock(&m_mutex);
     do
     {
         if(!messageData)
         {
             break;
         }
-        pthread_mutex_lock(&m_mutex);
         unsigned int len = *(unsigned int*)(&m_buffer[m_readPos]);
         if(!len || len > m_writePos - m_readPos)
         {
@@ -68,7 +68,6 @@ bool MessageBuffer::beginRead(MessageData *messageData)
         m_readPos += len;
         ret = true;
     }while(false);
-
     pthread_mutex_unlock(&m_mutex);
     return ret;
 }

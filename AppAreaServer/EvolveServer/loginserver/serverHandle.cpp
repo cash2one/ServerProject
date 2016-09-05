@@ -16,7 +16,7 @@ bool ServerHandle::init()
     ServerTask::s_serverMsgDispatcher.messageReg<ProtoMsgData::msg>(callBack);\
 }
     MESSAGE_INIT(ReqVerifyServer,reqVerifyServer);
-
+    MESSAGE_INIT(AckCreateUser,ackCreateUser);
 #undef MESSAGE_INIT
 
     return true;
@@ -25,4 +25,9 @@ bool ServerHandle::init()
 bool ServerHandle::reqVerifyServer(boost::shared_ptr<ServerTask> serverTask,const boost::shared_ptr<ProtoMsgData::ReqVerifyServer> message)
 {
     return serverTask->verify(message->serverinfo());
+}
+
+bool ServerHandle::ackCreateUser(boost::shared_ptr<ServerTask> serverTask,const boost::shared_ptr<ProtoMsgData::AckCreateUser> message)
+{
+    return serverTask->ackCreateUser(message);
 }

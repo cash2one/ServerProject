@@ -317,12 +317,6 @@ void Server::updateOtherServer(const ProtoMsgData::ServerInfo &serverInfo)
 
 bool Server::findServer(const unsigned int id)
 {
-#if 0
-    if(!TaskManager::getInstance().getServerTask(id))
-    {
-        m_serverInfoMap.erase(id);
-    }
-#endif
     return m_serverInfoMap.find(id) != m_serverInfoMap.end();
 }
 void Server::addServer(const ProtoMsgData::ServerInfo &info)

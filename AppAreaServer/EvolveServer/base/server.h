@@ -51,6 +51,10 @@ class Server
         static void loadExcelTbx(const std::string &file,char *&buf,int &size);
         virtual bool loadConf() = 0;
         virtual bool end() = 0;
+        virtual MsgRet dispatcher(boost::shared_ptr<google::protobuf::Message>)
+        {
+            return MR_No_Register;
+        }
         void updateOtherServer(const ProtoMsgData::ServerInfo &serverInfo);
         bool findServer(const unsigned int id);
         void addServer(const ProtoMsgData::ServerInfo &info);

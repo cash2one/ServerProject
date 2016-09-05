@@ -18,50 +18,77 @@ bool SuperClientHandle::init()
 }
     MESSAGE_INIT(AckUpdateServerInfo,ackUpdateServerInfo);
     MESSAGE_INIT(AckNotifyMe,ackServerInfo);
+    MESSAGE_INIT(ReqCreateUser,reqCreateUser);
 #undef MESSAGE_INIT
     return true;
 }
 
 bool SuperClientHandle::ackUpdateServerInfo(boost::shared_ptr<SuperClient> superClient,const boost::shared_ptr<ProtoMsgData::AckUpdateServerInfo> message)
 {
-    const ProtoMsgData::ServerInfo &serverInfo = message->serverinfo();
-    Server *server = superClient->getServer();
-    if(!server)
+    bool ret = false;
+    do
     {
-        return false;
-    }
-    server->updateOtherServer(serverInfo);
-    if(server->getType() < serverInfo.servertype())
-    {
-        ProtoMsgData::AckRespServerInfo ackMsg;
-        ackMsg.set_id(serverInfo.id());
-        superClient->sendMsg(ackMsg);
-    }
-    return true;
+        const ProtoMsgData::ServerInfo &serverInfo = message->serverinfo();
+        Server *server = superClient->getServer();
+        if(!server)
+        {
+            break;
+        }
+        server->updateOtherServer(serverInfo);
+        if(server->getType() < serverInfo.servertype())
+        {
+            ProtoMsgData::AckRespServerInfo ackMsg;
+            ackMsg.set_id(serverInfo.id());
+            superClient->sendMsg(ackMsg);
+        }
+        ret = true;
+    }while(false);
+    return ret;
 }
 
 bool SuperClientHandle::ackServerInfo(boost::shared_ptr<SuperClient> superClient,const boost::shared_ptr<ProtoMsgData::AckNotifyMe> message)
 {
-    if(message->serverinfo_size() < 1)
+    bool ret = false;
+    do
     {
-        return false;
-    }
-    Server *server = superClient->getServer();
-    if(!server)
-    {
-        return false;
-    }
-    for(int cnt = 0;cnt < message->serverinfo_size();++cnt)
-    {
-        const ProtoMsgData::ServerInfo &serverInfo = message->serverinfo(cnt);
-        if(cnt == 0)
+        if(message->serverinfo_size() < 1)
         {
-            server->setServerInfo(serverInfo);
+            break;
         }
-        else
+        Server *server = superClient->getServer();
+        if(!server)
         {
-            server->updateOtherServer(serverInfo);
+            break;
         }
-    }
-    return true;
+        for(int cnt = 0;cnt < message->serverinfo_size();++cnt)
+        {
+            const ProtoMsgData::ServerInfo &serverInfo = message->serverinfo(cnt);
+            if(cnt == 0)
+            {
+                server->setServerInfo(serverInfo);
+            }
+            else
+            {
+                server->updateOtherServer(serverInfo);
+            }
+        }
+        ret = true;
+    }while(false);
+    return ret;
+}
+
+bool SuperClientHandle::reqCreateUser(boost::shared_ptr<SuperClient> superClient,const boost::shared_ptr<ProtoMsgData::ReqCreateUser> message)
+{
+    bool ret = false;
+    do
+    {
+        Server *server = superClient->getServer();
+        if(!server)
+        {
+            break;
+        }
+        MsgRet flg = server->dispatcher(message);
+        ret = flg == MR_False ? false : true;
+    }while(false);
+    return ret;
 }

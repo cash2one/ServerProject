@@ -13,6 +13,7 @@ class SuperClientHandle : public MessageHandle
     public:
         static bool ackUpdateServerInfo(boost::shared_ptr<SuperClient> superClient,const boost::shared_ptr<ProtoMsgData::AckUpdateServerInfo> message);
         static bool ackServerInfo(boost::shared_ptr<SuperClient> superClient,const boost::shared_ptr<ProtoMsgData::AckNotifyMe> message);
+        static bool reqCreateUser(boost::shared_ptr<SuperClient> superClient,const boost::shared_ptr<ProtoMsgData::ReqCreateUser> message);
 
 };
 

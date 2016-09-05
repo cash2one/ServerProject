@@ -40,13 +40,14 @@ namespace Flyer
         appender->setName("file");
         appender->setEncoding("UTF-8");
         logger->addAppender(appender);
-
+#if 0
         if(!logger->getAppender("console"))
         {
             log4cxx::ConsoleAppenderPtr console = new log4cxx::ConsoleAppender(layOut);
             console->setName("console");
             logger->addAppender(console);
         }
+#endif
     }
     void changeLogger(const char *file,const unsigned long now)
     {

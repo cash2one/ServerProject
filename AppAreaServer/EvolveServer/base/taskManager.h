@@ -28,6 +28,7 @@ class TaskManager : public Singleton<TaskManager>
         void sendHeartMsg(const unsigned cycle);
         bool addGatewayTask(const unsigned charID,const unsigned long id);
         boost::shared_ptr<Task> getGatewayTask(const unsigned charID);
+        boost::shared_ptr<Task> getServerTaskByType(const ProtoMsgData::ServerType type);
     private:
         std::map<unsigned long,boost::shared_ptr<Task> > m_taskMap;
         //专门用来装gatewayTask的

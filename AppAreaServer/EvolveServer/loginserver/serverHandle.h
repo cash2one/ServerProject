@@ -12,6 +12,7 @@ class ServerHandle : public MessageHandle
         virtual bool init();
     public:
         static bool reqVerifyServer(boost::shared_ptr<ServerTask> serverTask,const boost::shared_ptr<ProtoMsgData::ReqVerifyServer> message);
+        static bool ackCreateUser(boost::shared_ptr<ServerTask> serverTask,const boost::shared_ptr<ProtoMsgData::AckCreateUser> message);
 };
 
 #endif

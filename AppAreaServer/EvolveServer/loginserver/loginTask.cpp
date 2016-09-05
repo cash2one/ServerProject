@@ -7,7 +7,7 @@
 #include "mainThread.h"
 
 LoginMessageDispatcher LoginTask::s_loginMsgDispatcher("登陆服务器消息处理器");
-LoginTask::LoginTask(const int fd) : Task(fd)
+LoginTask::LoginTask(const int fd) : Task(fd),m_charID(0)
 {
 }
 
@@ -106,6 +106,161 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
             code = ProtoMsgData::EC_Passwd_Wrong;
             break;
         }
+        if(!hasCreateUser(message->phone()))
+        {
+            ret = createUser(message->phone());
+            break;
+        }
+        if(!findGateway(message->phone(),ackMsg))
+        {
+            break;
+        }
+        ret = true;
+    }while(false);
+    if(code != ProtoMsgData::EC_Default)
+    {
+        ProtoMsgData::AckErrorCode ackMsg;
+        ackMsg.set_code(code);
+        sendMsg(ackMsg);
+    }
+    if(ret)
+    {
+        if(m_charID)
+        {
+            ackMsg.set_ret(ret);
+            sendMsg(ackMsg);
+            VerifyThread::getInstance().addRecycle(m_id);
+        }
+        else
+        {
+            setVerify(true);
+        }
+    }
+    else
+    {
+        ackMsg.set_ret(ret);
+        sendMsg(ackMsg);
+        VerifyThread::getInstance().addRecycle(m_id);
+    }
+
+    std::ostringstream oss;
+    oss << "[请求登陆网关" << (ret ? "成功" : "失败") << "] (" << message->phone() << "," << message->passwd() << "," << ackMsg.ip() << "," << ackMsg.port() << "," << m_charID << "," << code << ")"; 
+    Debug(Flyer::logger,oss.str().c_str());
+    return ret;
+}
+
+bool LoginTask::hasCreateUser(const std::string phone)
+{
+    bool ret = false;
+    do
+    {
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
+        if(!redisMem)
+        {
+            break;
+        }
+        m_charID = redisMem->getInt("charid",phone.c_str());
+        if(!m_charID)
+        {
+            break;
+        }
+        ret = true;
+    }while(false);
+    return ret;
+}
+ 
+bool LoginTask::createUser(const std::string phone)
+{
+    bool ret = false;
+    do
+    {
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
+        if(!redisMem)
+        {
+            break;
+        }
+        unsigned long charID = redisMem->getInt("charid",phone.c_str());
+        if(charID)
+        {
+            break;
+        }
+        ProtoMsgData::ReqCreateUser reqMsg;
+        reqMsg.set_phone(phone);
+        reqMsg.set_id(getID());
+        boost::shared_ptr<Task> task = TaskManager::getInstance().getServerTaskByType(ProtoMsgData::ST_Super);
+        if(!task)
+        {
+            break;
+        }
+        std::ostringstream oss;
+        oss << "[请求网关(请求新建角色)] (" << phone << "," << getID() << ")";
+        Debug(Flyer::logger,oss.str().c_str());
+        ret = task->sendMsg(reqMsg);
+    }while(false);
+    return ret;
+}
+
+bool LoginTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> message)
+{
+    bool ret = false;
+    ProtoMsgData::ErrorCode code = ProtoMsgData::EC_Default;
+    ProtoMsgData::AckGateway ackMsg;
+    do
+    {
+        if(message->code() != ProtoMsgData::EC_Default)
+        {
+            code = message->code();
+            break;
+        }
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
+        if(!redisMem)
+        {
+            break;
+        }
+        std::set<unsigned long> idSet;
+        if(!redisMem->getSet("gateway","idset",idSet))
+        {
+            break;
+        }
+        if(!findGateway(message->phone(),ackMsg))
+        {
+            break;
+        }
+        unsigned long charID = redisMem->getInt("charid",message->phone().c_str());
+        if(charID != message->charid())
+        {
+            Debug(Flyer::logger,"[redis取出错] (" << charID << "," << message->charid() << "," << message->phone() << ")");
+            break;
+        }
+        m_charID = message->charid();
+        ret = true;
+    }while(false);
+    if(code != ProtoMsgData::EC_Default)
+    {
+        ProtoMsgData::AckErrorCode codeMsg;
+        codeMsg.set_code(code);
+        sendMsg(codeMsg);
+    }
+    ackMsg.set_ret(ret);
+    sendMsg(ackMsg);
+
+    std::ostringstream oss;
+    oss << "[请求网关(建角返回)" << (ret ? "成功" : "失败") << "] (" << message->phone() << "," << ackMsg.ip() << "," << ackMsg.port() << "," << m_charID << "," << code << ")"; 
+    Debug(Flyer::logger,oss.str().c_str());
+    MainThread::getInstance().addRecycle(m_id);
+    return ret;
+}
+
+bool LoginTask::findGateway(const std::string &phone,ProtoMsgData::AckGateway &ackMsg)
+{
+    bool ret = false;
+    do
+    {
+        boost::shared_ptr<RedisMem> redisMem = RedisMemManager::getInstance().getRedis();
+        if(!redisMem)
+        {
+            break;
+        }
         std::set<unsigned long> idSet;
         if(!redisMem->getSet("gateway","idset",idSet))
         {
@@ -125,14 +280,18 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
             unsigned int len = redisMem->getBin("gateway",*iter,temp);
             ProtoMsgData::GatewayInfo gateInfo;
             gateInfo.ParseFromArray(temp,len);
-            if(gateInfo.status() == ProtoMsgData::GS_Normal && (!lessNum || gateInfo.person() <= lessNum))
+            if(gateInfo.status() != ProtoMsgData::GS_Normal)
+            {
+                continue;
+            }
+            if(!port || gateInfo.person() <= lessNum)
             {
                 lessID = *iter;
                 lessNum = gateInfo.person();
                 port = gateInfo.port();
                 ip = gateInfo.ip();
             }
-            Info(Flyer::logger,"[查找网关] (" << gateInfo.id() << ")");
+            Info(Flyer::logger,"[查找网关] (" << gateInfo.id() << "," << gateInfo.person() << "," << lessNum << "," << lessID <<")");
         }
         if(!lessID)
         {
@@ -143,7 +302,7 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
         {
             break;
         }
-        if(!redisMem->setInt("logingate",message->phone().c_str(),lessID))
+        if(!redisMem->setInt("logingate",phone.c_str(),lessID))
         {
             break;
         }
@@ -151,21 +310,5 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
         ackMsg.set_port(port);
         ret = true;
     }while(false);
-    if(code != ProtoMsgData::EC_Default)
-    {
-        ProtoMsgData::AckErrorCode ackMsg;
-        ackMsg.set_code(code);
-        sendMsg(ackMsg);
-    }
-    ackMsg.set_ret(ret);
-    sendMsg(ackMsg);
-    if(ret)
-    {
-        setVerify(true);
-    }
-    std::ostringstream oss;
-    oss << "[请求网关" << (ret ? "成功" : "失败") << "] (" << message->phone() << "," << message->passwd() << "," << ackMsg.ip() << "," << ackMsg.port() << "," << code << ")"; 
-    Debug(Flyer::logger,oss.str().c_str());
-    MainThread::getInstance().addRecycle(m_id);
     return ret;
 }
