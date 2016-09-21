@@ -5,14 +5,13 @@
 #include "messageHandle.h"
 #include "serverHandle.h"
 #include "recycleThread.h"
-#include "verifyThread.h"
-#include "mainThread.h"
 #include "loginTimeTick.h"
 #include "mysqlPool.h"
 #include "excelBase.h"
 #include "redisMemManager.h"
 #include "loginHandle.h"
 #include "httpThread.h"
+#include "threadPool.h"
 
 static void ctrlHandler(int signal)
 {
@@ -81,11 +80,11 @@ bool LoginServer::acceptConnect(const int socket,const int listenPort)
             if(TaskManager::getInstance().addTask(task))
             {
                 task->setServerType(ProtoMsgData::ST_Super);
-                ret = VerifyThread::getInstance().add(task->getID());
+                ret = ThreadPool::getInstance().addVerify(task->getID());
             }
             if(!ret)
             {
-                RecycleThread::getInstance().add(task->getID());
+                ThreadPool::getInstance().addRecycle(task->getID());
             }
         }
         else
@@ -94,11 +93,11 @@ bool LoginServer::acceptConnect(const int socket,const int listenPort)
             if(TaskManager::getInstance().addTask(task))
             {
                 task->setServerType(ProtoMsgData::ST_Client);
-                ret = VerifyThread::getInstance().add(task->getID());
+                ret = ThreadPool::getInstance().addVerify(task->getID());
             }
             if(!ret)
             {
-                RecycleThread::getInstance().add(task->getID());
+                ThreadPool::getInstance().addRecycle(task->getID());
             }
         }
     }while(false);

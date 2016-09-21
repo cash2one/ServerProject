@@ -129,7 +129,7 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
         {
             ackMsg.set_ret(ret);
             sendMsg(ackMsg);
-            VerifyThread::getInstance().addRecycle(m_id);
+            ThreadPool::getInstance().addRecycleFromVerify(m_id);
         }
         else
         {
@@ -140,7 +140,7 @@ bool LoginTask::getGatewayInfo(boost::shared_ptr<ProtoMsgData::ReqGateway> messa
     {
         ackMsg.set_ret(ret);
         sendMsg(ackMsg);
-        VerifyThread::getInstance().addRecycle(m_id);
+        ThreadPool::getInstance().addRecycleFromVerify(m_id);
     }
 
     std::ostringstream oss;
@@ -247,7 +247,7 @@ bool LoginTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> mes
     std::ostringstream oss;
     oss << "[请求网关(建角返回)" << (ret ? "成功" : "失败") << "] (" << message->phone() << "," << ackMsg.ip() << "," << ackMsg.port() << "," << m_charID << "," << code << ")"; 
     Debug(Flyer::logger,oss.str().c_str());
-    MainThread::getInstance().addRecycle(m_id);
+    ThreadPool::getInstance().addRecycleFromMain(m_id);
     return ret;
 }
 

@@ -152,11 +152,11 @@ bool SceneServer::acceptConnect(const int socket,const int listenPort)
     boost::shared_ptr<SceneTask> task(new SceneTask(socket));
     if(TaskManager::getInstance().addTask(task))
     {
-        ret = VerifyThread::getInstance().add(task->getID());
+        ret = ThreadPool::getInstance().addVerify(task->getID());
     }
     if(!ret)
     {
-        RecycleThread::getInstance().add(task->getID());
+        ThreadPool::getInstance().addRecycle(task->getID());
     }
     return ret;
 }

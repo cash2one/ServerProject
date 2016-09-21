@@ -282,7 +282,7 @@ bool GatewayTask::ackCreateUser(boost::shared_ptr<ProtoMsgData::AckCreateUser> m
     sendMsg(ackMsg);
     if(!ret)
     {
-        VerifyThread::getInstance().addRecycle(getID());
+        ThreadPool::getInstance().addRecycleFromVerify(getID());
     }
     else
     {

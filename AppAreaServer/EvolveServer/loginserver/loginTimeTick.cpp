@@ -3,6 +3,7 @@
 #include "taskManager.h"
 #include "loginServer.h"
 #include "httpThread.h"
+#include "threadPool.h"
 
 Time LoginTimeTick::s_time;
 
@@ -34,6 +35,7 @@ void LoginTimeTick::run()
         }
         if(m_minClock(s_time))
         {
+            ThreadPool::getInstance().print();
 #if 0
             std::ostringstream oss;
             oss << "flyer_" << cnt;

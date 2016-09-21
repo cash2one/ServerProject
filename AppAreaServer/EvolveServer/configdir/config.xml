@@ -42,6 +42,12 @@
         <dbcycle>40</dbcycle>
         <!--redis配置文件-->
         <redisxml>configdir/xmlConfig/redisConfig.xml</redisxml>
+        <!--验证线程数量-->
+        <verifythread>1</verifythread>
+        <!--主逻辑线程数量-->
+        <mainthread>1</maintherad>
+        <!--回收线程数量-->
+        <recyclethread>1</recyclethread>
         <!--http 超时秒数-->
         <httptimeout>30</httptimeout>
         <!--测试url-->
@@ -56,6 +62,9 @@
     <scene>
     </scene>
     <gateway>
+        <verifythread>2</verifythread>
+        <mainthread>5</maintherad>
+        <recyclethread>1</recyclethread>
     </gateway>
     <robot>
         <!--登陆服务器IP和端口-->

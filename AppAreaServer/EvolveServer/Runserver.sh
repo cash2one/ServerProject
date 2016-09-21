@@ -27,8 +27,8 @@ start()
     mkdir log
 
     #启动redis
-    #echo "redis-server configdir/redis.conf"
-    #redis-server configdir/redis.conf
+    echo "redis-server configdir/redis.conf"
+    redis-server configdir/redis.conf
 
     #启动login
     for list in $count

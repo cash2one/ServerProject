@@ -256,6 +256,10 @@ bool SuperTask::verify(const ProtoMsgData::ServerType &serverType)
     bool ret = false;
     do
     {
+        if(getVerify())
+        {
+            break;
+        }
         if(!m_serverID)
         {
             if(!verifyIp(serverType))
