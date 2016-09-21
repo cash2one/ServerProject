@@ -2,6 +2,26 @@
 #include "flyer.h"
 #include "taskManager.h"
 #include "clientManager.h"
+#include "threadPool.h"
+
+RecycleThread::RecycleThread(const unsigned int id) : Thread("回收线程")
+{
+    m_tempID = id;
+}
+
+RecycleThread::~RecycleThread()
+{
+}
+
+bool RecycleThread::init()
+{
+    return true;
+}
+
+unsigned long RecycleThread::size()
+{
+    return m_taskSet.size();
+}
 
 bool RecycleThread::add(const unsigned long id)
 {
@@ -43,6 +63,7 @@ void RecycleThread::run()
                         ClientManager::getInstance().eraseClient(*iter);
                     }
                 }
+                ThreadPool::getInstance().delFromRecycle(*iter);
             }
             m_taskSet.clear();
         }

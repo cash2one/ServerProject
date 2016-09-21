@@ -4,7 +4,6 @@
 #include "parseMessage.h"
 #include "construct.h"
 #include "system.pb.h"
-#include "mainThread.h"
 
 unsigned long Connect::s_tempid = 0;
 ConnectMessageDispatcher Connect::s_connectMsgDispatcher("连接消息处理器");
@@ -258,7 +257,7 @@ bool Connect::sendHeartMsg()
     }while(false);
     if(!ret)
     {
-        MainThread::getInstance().addRecycle(m_id);
+        ThreadPool::getInstance().addRecycleFromMain(m_id);
         Info(Flyer::logger,"[心跳包超时] (" << m_id << ")");
     }
     return ret;

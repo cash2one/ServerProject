@@ -13,6 +13,8 @@ class Thread : /*public SharedPtr* ,*/ private DisCopy
         bool m_join;
         pthread_mutex_t m_mutex;
         pthread_cond_t m_cond;
+    protected:
+        unsigned int m_tempID;
     public:
         Thread(const std::string &name,const bool join = true);
         virtual ~Thread()
@@ -32,6 +34,10 @@ class Thread : /*public SharedPtr* ,*/ private DisCopy
         inline void final()
         {
             m_complete = true;
+        }
+        inline unsigned int getTempID()
+        {
+            return m_tempID;
         }
         void sleep(const unsigned int sec);
         void usleep(const unsigned int msec);

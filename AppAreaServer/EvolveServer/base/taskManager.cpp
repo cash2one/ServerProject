@@ -1,6 +1,6 @@
 #include "taskManager.h"
 #include "recycleThread.h"
-#include "mainThread.h"
+#include "threadPool.h"
 
 bool TaskManager::addTask(boost::shared_ptr<Task> task)
 {
@@ -117,7 +117,7 @@ void TaskManager::sendHeartMsg(const unsigned cycle)
     }
     for(auto iter = delVec.begin();iter != delVec.end();++iter)
     {
-        MainThread::getInstance().addRecycle(*iter);
+        ThreadPool::getInstance().addRecycleFromMain(*iter);
     }
 }
 

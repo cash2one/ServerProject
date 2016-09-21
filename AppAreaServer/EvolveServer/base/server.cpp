@@ -8,12 +8,10 @@
 #include "taskManager.h"
 #include "clientManager.h"
 #include "clientHandle.h"
-#include "recycleThread.h"
-#include "mainThread.h"
-#include "verifyThread.h"
 #include "redisMemManager.h"
 #include "connectHandle.h"
 #include "clientThread.h"
+#include "threadPool.h"
 
 Server::Server(const std::string &name,const ProtoMsgData::ServerType &type) : m_name(name),m_type(type),m_id(0),m_port(0),m_fd(-1),m_epfd(-1),m_verify(false),m_outIp(),m_outPort(0),m_outFd(-1),m_superClient(NULL),m_terminate(false)
 {
@@ -99,6 +97,10 @@ bool Server::init()
         }
         MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ConnectHandle>(new ConnectHandle()));
         MessageHandleManager::getInstance().addHandle(boost::shared_ptr<TaskHandle>(new TaskHandle()));
+        if(!ThreadPool::getInstance().init())
+        {
+            break;
+        }
         if(m_type != ProtoMsgData::ST_Login)
         {
             MessageHandleManager::getInstance().addHandle(boost::shared_ptr<ClientHandle>(new ClientHandle()));
@@ -121,6 +123,10 @@ bool Server::init()
         //清空redis
         if(m_type == ProtoMsgData::ST_Login)
         {
+            if(!RedisMemManager::getInstance().getRedis())
+            {
+                break;
+            }
             RedisMemManager::getInstance().clearMemory();
         }
         ret = true;
@@ -343,9 +349,7 @@ unsigned int Server::getServerID() const
 void Server::startThread()
 {
     this->startServerThread();
-    RecycleThread::getInstance().start();
-    VerifyThread::getInstance().start();
-    MainThread::getInstance().start();
+    ThreadPool::getInstance().start();
 }
 
 void Server::endThread()
@@ -356,14 +360,6 @@ void Server::endThread()
         m_superClient->final();
         m_superClient->end();
     }
-
-    VerifyThread::getInstance().final();
-    VerifyThread::getInstance().end();
-
-    MainThread::getInstance().final();
-    MainThread::getInstance().end();
-     
-    RecycleThread::getInstance().final();
-    RecycleThread::getInstance().end();
+    ThreadPool::getInstance().final();
 }
 

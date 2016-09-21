@@ -4,6 +4,27 @@
 #include "recycleThread.h"
 #include "taskManager.h"
 
+VerifyThread::VerifyThread(const unsigned id) : Thread("验证线程")
+{
+    m_tempID = id;
+}
+
+VerifyThread::~VerifyThread()
+{
+    TEMP_FAILURE_RETRY(::close(m_epfd));
+}
+
+bool VerifyThread::init()
+{
+    m_epfd = epoll_create(atol(Flyer::globalConfMap["threadprocesstask"].c_str()));
+    return m_epfd != -1;
+}
+
+unsigned long VerifyThread::size()
+{
+    return m_taskSet.size();
+}
+
 bool VerifyThread::add(const unsigned long id)
 {
     bool flag = false;
@@ -108,30 +129,26 @@ void VerifyThread::addRecycle(const unsigned long id,const bool del)
     if(task)
     {
         task->delEpoll(m_epfd,EPOLLIN);
-        RecycleThread::getInstance().add(id);
     }
+    ThreadPool::getInstance().delFromVefiry(id);
+    ThreadPool::getInstance().addRecycle(id);
     if(del)
     {
         m_taskSet.erase(id);
     }
 }
 
-void VerifyThread::VerifyThread::addMain(const unsigned long id)
+bool VerifyThread::addMain(const unsigned long id)
 {
+    bool ret = false;
     boost::shared_ptr<Task> task = TaskManager::getInstance().getTask(id);
     if(task)
     {
         task->delEpoll(m_epfd,EPOLLIN);
         m_taskSet.erase(task->getID());
-        task->resetLifeTime();
-        if(!MainThread::getInstance().add(task->getID()))
-        {
-            addRecycle(id);
-        }
+        ThreadPool::getInstance().delFromVefiry(id);
+        ret = ThreadPool::getInstance().addMain(id);
     }
-    else
-    {
-        addRecycle(id);
-    }
+    return ret;
 }
 

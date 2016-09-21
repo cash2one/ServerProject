@@ -41,7 +41,8 @@ src = thread.cpp\
 	  httpThread.cpp\
 	  task.cpp\
 	  clientThread.cpp\
-	  taskHandle.cpp
+	  taskHandle.cpp\
+	  threadPool.cpp
 		
 
 object = $(patsubst %.cpp,%.o,$(src))

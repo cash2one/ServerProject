@@ -2,6 +2,7 @@
 #include "recycleThread.h"
 #include "clientThread.h"
 #include "flyer.h"
+#include "threadPool.h"
 
 ClientThread::ClientThread()
 {
@@ -102,7 +103,7 @@ void ClientThread::addRecycle(const unsigned long id)
     if(client)
     {
         client->delEpoll(m_epfd,EPOLLIN);
-        RecycleThread::getInstance().add(id);
+        ThreadPool::getInstance().addRecycle(id);
     }
     m_clientSet.erase(id);
 }

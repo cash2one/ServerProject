@@ -56,7 +56,7 @@ class MessageQueue
 class MessageBuffer
 {
     private:
-        static const unsigned int s_MessageBufferMax = 1024;
+        static const unsigned int s_MessageBufferMax = 500;
         unsigned int m_readPos;
         unsigned int m_writePos;
         std::vector<unsigned char> m_buffer;

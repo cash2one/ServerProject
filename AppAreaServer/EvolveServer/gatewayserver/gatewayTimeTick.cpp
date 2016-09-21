@@ -2,6 +2,7 @@
 #include "flyer.h"
 #include "taskManager.h"
 #include "gatewayServer.h"
+#include "threadPool.h"
 
 Time GatewayTimeTick::s_time;
 
@@ -34,6 +35,10 @@ void GatewayTimeTick::run()
             TaskManager::getInstance().sendHeartMsg(cycle);
             cycle += 1;
             cycle %= cycleTtotal; 
+        }
+        if(m_minClock(s_time))
+        {
+            ThreadPool::getInstance().print();
         }
         ClientThread::getInstance().doCmd();
 #if 0

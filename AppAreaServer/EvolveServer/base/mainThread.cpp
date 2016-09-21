@@ -1,6 +1,28 @@
 #include "mainThread.h"
 #include "recycleThread.h"
 #include "taskManager.h"
+#include "threadPool.h"
+
+MainThread::MainThread(const unsigned int id) : Thread("主线程")
+{
+    m_tempID = id;
+}
+
+MainThread::~MainThread()
+{
+    TEMP_FAILURE_RETRY(::close(m_epfd));
+}
+
+bool MainThread::init()
+{
+    m_epfd = epoll_create(atol(Flyer::globalConfMap["threadprocesstask"].c_str()));
+    return m_epfd != -1;
+}
+
+unsigned long MainThread::size()
+{
+    return m_taskSet.size();
+}
 
 bool MainThread::add(const unsigned long id)
 {
@@ -18,6 +40,7 @@ bool MainThread::add(const unsigned long id)
         {
             break;
         }
+        task->resetLifeTime();
         task->resetHeartTime();
         task->setStatus(Task_Status_Main);
         task->addEpoll(m_epfd,EPOLLIN | EPOLLOUT | EPOLLPRI | EPOLLERR);
@@ -98,8 +121,9 @@ void MainThread::addRecycle(const unsigned long id,const bool del)
     if(task)
     {
         task->delEpoll(m_epfd,EPOLLIN);
-        RecycleThread::getInstance().add(id);
     }
+    ThreadPool::getInstance().delFromMain(id);
+    ThreadPool::getInstance().addRecycle(id);
     if(del)
     {
         m_taskSet.erase(id);

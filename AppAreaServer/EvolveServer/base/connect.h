@@ -7,7 +7,7 @@
 #include "timefun.h"
 #include "system.pb.h"
 #include "messageDispatcher.h"
-#include "verifyThread.h"
+#include "threadPool.h"
 
 enum TaskStatus
 {
@@ -64,7 +64,7 @@ class Connect : private DisCopy , public boost::enable_shared_from_this<Connect>
             m_verify = verify;
             if(m_verify)
             {
-                VerifyThread::getInstance().addMain(m_id);
+                ThreadPool::getInstance().addMainFromVerify(m_id);
             }
         }
         inline unsigned long getID() const
